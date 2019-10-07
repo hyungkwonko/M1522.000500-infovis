@@ -1,1 +1,1 @@
-introduction to infovis hws
+introduction to infovis class @ SNU in Fall 2019
