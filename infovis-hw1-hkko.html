@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <style>
+        #container {
+            display: flex;
+        }
+        #plot {
+            float:left;
+            margin-right: 20px;
+        }
+    </style>
+    <title>hw1</title>
+</head>
+<body>
+
+    <h1> Information Visualization Homework 1</h1>
+    <h2> Hyung-Kwon Ko (2019-24961)</h2>
+
+    <div id="container">
+        <div id="plot"></div>
+        <div id="plot2"></div>
+    </div>
+    <button>update</button>
+ 
+        <!-- load the d3.js library -->    	
+    <script src="https://d3js.org/d3.v4.min.js"></script>
+    <script>
+
+        function translate(x, y) {
+            return 'translate(' + x + ', ' + y + ')';
+        }
+
+        // set the dimensions and margins of the graph
+        let margin = {top: 30, right: 20, bottom: 30, left: 30};
+        let width = 550 - margin.left - margin.right;
+        let height = 550 - margin.top - margin.bottom;
+
+        let svg = d3.select("#plot").append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", translate(margin.left, margin.top));
+
+        // data generating function
+        function getData() {
+            let data = [];
+            let random_number = Math.random();
+            let random_number2 = Math.random();
+
+            for (let i = 0; i < 100; i++) {
+                let x = Math.floor(Math.random()*100) * random_number;
+                let y = Math.floor(Math.random()*100) * random_number2;
+                let radius = Math.random() * 15;
+                let r = Math.floor(Math.random()*256);
+                let g = Math.floor(Math.random()*256);
+                let b = Math.floor(Math.random()*256);
+                data.push({"x": x, "y": y, "radius": radius, "r": r, "g": g, "b": b});
+            }
+            return data;
+        };
+        
+        // Get the data
+        let data = [];
+        data = getData();
+
+
+        // set the ranges
+        let scaleX = d3.scaleLinear()
+        .domain([
+            d3.min(data, d => d.x),
+            d3.max(data, d => d.x)
+        ])
+        .range([0, width]);
+
+        let scaleY = d3.scaleLinear()
+        .domain([
+            d3.min(data, d => d.y),
+            d3.max(data, d => d.y)
+        ])
+        .range([height, 0]);
+
+        // rgb string concat function
+        function rgb(r, g, b){
+            r = Math.floor(r);
+            g = Math.floor(g);
+            b = Math.floor(b);
+            return ["rgb(",r,",",g,",",b,")"].join("");
+        }
+
+        // add the dots
+        svg.selectAll("dot")
+            .data(data)
+            .enter().append("circle")
+            .attr("r", d => d.radius)
+            .attr("cx", d => scaleX(d.x))
+            .attr("cy", d => scaleY(d.y))
+            .style('fill',  d => rgb(d.r, d.g, d.b))
+            .on("mouseover", function(d) {
+                d3.select(this)
+                .transition()
+                .attr("r", 30)
+                .style('opacity', 0.8)
+                .duration("200");
+            })                  
+            .on("mouseout", function(d) {
+                d3.select(this)
+                .attr("r", d.radius);
+            });
+
+        // define axis
+        let xAxis = d3.axisBottom(scaleX);
+        let yAxis = d3.axisLeft(scaleY);
+
+        // add the X Axis
+        svg.append("g")
+            .attr("class", "x-axis")
+            .attr("transform", translate(0, height))
+            .call(xAxis);
+            
+        // add the Y Axis
+        svg.append("g")
+            .attr("class", "y-axis")
+            .call(yAxis);
+
+
+
+
+
+
+
+
+
+
+
+
+
+        // let color = d3.scaleOrdinal(d3.schemeCategory10);
+
+        let svg2 = d3.select("#plot2").append("svg")  
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+            .append("g")
+            .attr("transform", translate(margin.left, margin.top))
+            .attr("class", "bar-chart");
+
+        let alphabet = ["A", "B", "C", "D", "E", "F", "G", "H", "I", "J"];
+        let color = ["#5E4FA2", "#3288BD", "#66C2A5", "#ABDDA4", "#E6F598", "#FFFFBF", "#FEE08B", "#FDAE61", "#F46D43", "#D53E4F", "#9E0142"];
+
+        function getData2() {
+            let data = [];
+            for(let i=0; i<10; i++) {
+                data.push({"y": Math.round(Math.random()*500), "color": color[i]});
+            }
+            return data;
+        };
+        
+        // Get the data
+        let data2 = [];
+        data2 = getData2();
+
+        let scaleX2 = d3.scaleBand()
+            .domain(alphabet)
+            .range([0, width]);
+
+        let scaleY2 = d3.scaleLinear()
+            .domain([0, height])
+            .range([height, 0]);
+
+        let barPadding = 5;  
+        let barWidth = (width / data2.length);
+
+        let barChart = svg2.selectAll("rect")  
+            .data(data2)
+            .enter()  
+            .append("rect")
+            .attr("y", d => height - d.y)
+            .attr("height", d => d.y)
+            .attr("width", barWidth - barPadding)
+            .style('fill',  d => d.color)
+            .attr("transform", function (d, i) {
+                return translate(barWidth * i, 0);  
+            });
+
+        let xAxis2 = d3.axisBottom(scaleX2);
+        let yAxis2 = d3.axisLeft(scaleY2);
+        
+        svg2.append("g")
+            .attr("class", "x-axis2")
+            .attr("transform", translate(0, height))
+            .call(xAxis2);
+            
+        // add the Y Axis
+        svg2.append("g")
+            .attr("class", "y-axis2")
+            .attr("transform", translate(0, 0))
+            .call(yAxis2);
+
+
+
+
+
+
+
+
+
+
+        d3.select("button").on("click", function() {
+            let newData = getData();
+
+            scaleX = d3.scaleLinear()
+                .domain([
+                    d3.min(newData, d => d.x),
+                    d3.max(newData, d => d.x)
+                ])
+                .range([0, width]);
+
+            scaleY = d3.scaleLinear()
+                .domain([
+                    d3.min(newData, d => d.y),
+                    d3.max(newData, d => d.y)
+                ])
+                .range([height, 0]);
+
+            svg.selectAll('circle')
+                .data(newData)
+                .transition()
+                .attr("cx", d => scaleX(d.x))
+                .attr("cy", d => scaleY(d.y))
+                .delay(function(d, i) {
+                        return i / newData.length * 500;
+                })
+
+            xAxis = d3.axisBottom(scaleX);
+            yAxis = d3.axisLeft(scaleY);
+    
+            svg.select('.x-axis')
+                .transition()
+                .duration(500)
+                .attr("transform", translate(0, height))
+                .call(xAxis)
+
+            svg.select('.y-axis')
+                .transition()
+                .duration(500)
+                .attr("transform", translate(0, 0))
+                .call(yAxis);
+
+
+
+            let newData2 = getData2();
+
+            svg2.selectAll('rect')
+                .data(newData2)
+                .transition()
+                .attr("y", d => height - d.y)  
+                .attr("height", d => d.y)
+                .delay(function(d, i) {
+                    return i / newData2.length * 500;
+                })
+
+        });
+
+    </script>
+</body>
+</html>
