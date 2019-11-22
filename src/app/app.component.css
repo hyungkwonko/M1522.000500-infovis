@@ -1,14 +1,122 @@
-.example-container {
-border: 1px solid rgba(0, 0, 0, 0.5);
+/* :host {
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 14px;
+  color: #333;
+  box-sizing: border-box;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+} */
+
+.hk-toolbar {
+  height: 60px;
+  display: flex;
+  align-items: center;
+  background-color: #1976d2;
+  color: white;
 }
 
-.example-sidenav-content {
-display: flex;
-height: 100%;
-align-items: center;
-justify-content: center;
+/* .content {
+  display: flex;
+  margin: 32px auto;
+  padding: 0 16px;
+  max-width: 960px;
+  flex-direction: column;
+  align-items: center;
+} */
+
+
+.hk-card,
+.hk-expansion {
+  max-width: 300px;
+  margin: 4px;
 }
 
-.example-sidenav {
-padding: 20px;
+.hk-radio-group {
+  display: flex;
+  flex-direction: column;
+  margin: 0;
+}
+
+.hk-radio-button {
+  margin: 5px;
+}
+
+.hk-projection-container {
+  display: flex;
+  float: left;
+  /* width: 100%;
+  height: 100%; */
+}
+
+.hk-projection-container2 {
+  display: flex;
+  flex-direction: column;
+  /* width: 25%;
+  height: 100%; */
+}
+
+.hk-projection {
+  /* width: 75%;
+  height: 100%; */
+  margin: 0;
+  background-color: lightgrey;
+}
+
+.hk-projection2 {
+  /* width: 100%;
+  height: 100%; */
+  margin: 0;
+  background-color: darkgrey;
+}
+
+.hk-projection3 {
+  /* width: 100%;
+  height: 100%; */
+  margin: 0;
+  background-color: saddlebrown;
+}
+
+/* .example-container {
+  width: 100%;
+  height: 850px;
+  border: 1px solid rgba(0, 0, 0, 0.5);
+} */
+
+/* .example-sidenav-content {
+  display: flex;
+  height: 100%;
+  align-items: center;
+  justify-content: center;
+} */
+
+.hk-sidenav {
+  padding: 20px;
+}
+
+
+.mat-drawer-container[fullscreen] {
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  position: absolute;
+}
+.mat-drawer-container[fullscreen].mat-drawer-opened {
+  overflow: hidden;
+}
+
+
+
+mat-grid-tile {
+  background: lightblue;
+}
+
+.hk-footer {
+  background-color: black;
+  color: white;
+  text-align: center;
+}
+
+.hk-footer > div > span {
+  text-align: center;
 }
