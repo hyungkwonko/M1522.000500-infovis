@@ -54,6 +54,7 @@ import { Seijun2Component } from './seijun2/seijun2.component';
 
 
 import { ChartsModule } from 'ng2-charts';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 @NgModule({
   declarations: [
@@ -69,7 +70,9 @@ import { ChartsModule } from 'ng2-charts';
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
+
     ChartsModule,
+    NgxChartsModule,
 
     A11yModule,
     CdkStepperModule,
