@@ -4,6 +4,7 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { AppComponent } from './app.component';
 import {HttpClientModule} from '@angular/common/http';
 
+
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {A11yModule} from '@angular/cdk/a11y';
 import {DragDropModule} from '@angular/cdk/drag-drop';
@@ -52,6 +53,7 @@ import { DongmoonComponent } from './dongmoon/dongmoon.component';
 import { Seijun2Component } from './seijun2/seijun2.component';
 
 
+import { ChartsModule } from 'ng2-charts';
 
 @NgModule({
   declarations: [
@@ -67,6 +69,7 @@ import { Seijun2Component } from './seijun2/seijun2.component';
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
+    ChartsModule,
 
     A11yModule,
     CdkStepperModule,
