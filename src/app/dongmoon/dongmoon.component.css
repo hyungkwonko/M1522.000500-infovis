@@ -1,0 +1,13 @@
+.dm-chart {
+  width: 300px;
+  height: 200px;
+}
+
+.dm-chart .axis path,
+.dm-chart .axis line {
+  stroke: #999;
+}
+
+.dm-chart .axis text {
+  fill: #999;
+}

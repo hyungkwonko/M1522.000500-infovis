@@ -4,7 +4,6 @@ import { ChartOptions, ChartType, ChartDataSets } from 'chart.js';
 import * as pluginDataLabels from 'chartjs-plugin-datalabels';
 import { Label } from 'ng2-charts';
 
-
 export type SA = d3.Selection<d3.BaseType, {}, any, {}>;
 
 @Component({
@@ -25,7 +24,8 @@ export class HyungkwonComponent implements OnInit {
       }
     }
   };
-  public barChartLabels: Label[] = ['2006', '2007', '2008', '2009', '2010', '2011', '2012'];
+
+  public barChartLabels: Label[] = ['2006', '20 07', '2008', '2009', '2010', '2011', '2012'];
   public barChartType: ChartType = 'bar';
   public barChartLegend = true;
   public barChartPlugins = [pluginDataLabels];
@@ -38,6 +38,7 @@ export class HyungkwonComponent implements OnInit {
   constructor() { }
 
   ngOnInit() {
+
   }
 
   // events
@@ -60,9 +61,10 @@ export class HyungkwonComponent implements OnInit {
       (Math.random() * 100),
       40];
     this.barChartData[0].data = data;
+
+    
   }
 }
-
 
 
 // constructor() { }
@@ -81,40 +83,50 @@ export class HyungkwonComponent implements OnInit {
 //       height = 400 - margin.top - margin.bottom;
 
 //   // append the svg object to the body of the page
-//   const svg: SA = d3.select("#viz_example")
+//   const svg: SA = d3.select("#hk-vz1")
 //     .append("svg")
 //       .attr("width", width + margin.left + margin.right)
 //       .attr("height", height + margin.top + margin.bottom)
 //     .append("g")
 //       .attr("transform", "translate(" + margin.left + "," + margin.top + ")");
+  
+//   console.log(svg);
 
-//   // Add X axis
-//   let x: any = d3.scaleLinear()
-//   .domain([0, 4000])
-//   .range([ 0, width]);
-//   svg.append("g")
-//   .attr("transform", "translate(0," + height + ")")
-//   .call(d3.axisBottom(x));
+      
+//   const loc: string = "https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/2_TwoNum.csv";
+
+//   // Read the data
+//   d3.csv(loc, function(data: any): any {
+//     // Add X axis
+//     let x: any = d3.scaleLinear()
+//     .domain([0, 4000])
+//     .range([ 0, width]);
+//     svg.append("g")
+//     .attr("transform", "translate(0," + height + ")")
+//     .call(d3.axisBottom(x));
+    
+//     // Add Y axis
+//     let y: any = d3.scaleLinear()
+//     .domain([0, 500000])
+//     .range([ height, 0]);
+//     svg.append("g")
+//     .call(d3.axisLeft(y));
   
-//   // Add Y axis
-//   let y: any = d3.scaleLinear()
-//   .domain([0, 500000])
-//   .range([ height, 0]);
-//   svg.append("g")
-//   .call(d3.axisLeft(y));
-  
-//   // Add dots
-//   svg.append('g')
-//   .selectAll("dot")
-//   .data(my_iris)
-//   .enter()
-//   .append("circle")
-//   .attr("cx", my_iris => x(my_iris[0]))
-//   .attr("cy", d => y(my_iris[1]))
-//   .attr("r", 1.5)
-//   .style("fill", "#69b3a2")
-  
-//   // const loc: string = "https://raw.githubusercontent.com/holtzy/data_to_viz/master/Example_dataset/2_TwoNum.csv";
-//   //Read the data
-//   // d3.csv(loc, function(data: any): any {
-//   // });
+//     console.log(data);
+    
+    
+//     // Add dots
+//     svg.append('g')
+//     .selectAll("dot")
+//     .data(data)
+//     .enter()
+//     .append("circle")
+//     .attr("cx", d => x(d.sepalLength))
+//     .attr("cy", d => y(d.sepalWidth))
+//     .attr("r", 1.5)
+//     .style("fill", "#69b3a2")
+//     });
+//   }
+// }
+
+
