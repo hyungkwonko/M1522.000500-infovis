@@ -55,6 +55,7 @@ import { Seijun2Component } from './seijun2/seijun2.component';
 
 import { ChartsModule } from 'ng2-charts';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { DantaeComponent } from './dantae/dantae.component';
 
 @NgModule({
   declarations: [
@@ -63,6 +64,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
     SeijunComponent,
     DongmoonComponent,
     Seijun2Component,
+    DantaeComponent,
   ],
   imports: [
     BrowserModule,
