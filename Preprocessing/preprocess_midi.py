@@ -34,6 +34,7 @@ def parse_events(f):
     current_tempo = 500000  # default tempo (bpm 120)
     sequence_position = 0
     note_id = 0
+    end_of_track = 0
     #print(midi.ticks_per_beat)
 
     for msg in merge_tracks(midi.tracks):
@@ -87,6 +88,8 @@ def parse_events(f):
         elif tp == 'set_tempo':
             tempo = msg.tempo
             attributes = ['tempo']
+        elif tp == 'end_of_track':
+            end_of_track = tick
 
         event = {
             'Type': tp,
@@ -132,14 +135,18 @@ def parse_events(f):
                 'ID': note_id,
                 'Start_tick': event['Tick'],
                 'End_tick': -1,
-                'Tick_interval': -1,
+                'Tick_duration': -1,
                 'Start_timing': event['Timing'],
                 'End_timing': -1,
                 'Channel': event['Channel'],
+                'Voice': -1,
+                'Is_chord': False,
                 'Note_position': event['Note_position'],
                 'Note_velocity': event['Note_velocity'],
                 'Note_pitch_class': '',
-                'Note_octave': -1
+                'Note_octave': -1,
+                'Note_duration': '',
+                'Following_rest_duration': ''
             })
             note_id = note_id + 1
         elif event['Type'] == 'note_off':
@@ -156,10 +163,114 @@ def parse_events(f):
                 # print(json.dumps(note, separators=(',', ':')))
             except StopIteration:
                 pass
-    def takeID(element):
+    def take_ID(element):
         return element["ID"]
-    notes.sort(key=takeID)
-    return events, notes, midi.ticks_per_beat
+    def take_start_tick(element):
+        return element["Start_tick"]
+    notes.sort(key=take_start_tick)
+
+    def round_tick(tick):
+        tpb = midi.ticks_per_beat
+        unit_tick = tpb / 8             # 32nd note
+        return round(round(tick / unit_tick) * unit_tick)
+        """
+        unit_triplet_tick = tpb / 6     # (8/3)th note
+        candidate1 = abs((tick / unit_tick) - round(tick / unit_tick))
+        candidate2 = abs(((tick - unit_triplet_tick) / unit_tick) - round((tick - unit_triplet_tick) / unit_tick))
+        candidate3 = abs(((tick - 2 * unit_triplet_tick) / unit_tick) - round((tick - 2 * unit_triplet_tick) / unit_tick))
+        candidate4 = abs(((tick - 4 * unit_triplet_tick) / unit_tick) - round((tick - 4 * unit_triplet_tick) / unit_tick))
+        candidate5 = abs(((tick - 8 * unit_triplet_tick) / unit_tick) - round((tick - 8 * unit_triplet_tick) / unit_tick))
+        min_candidate = min(candidate1, candidate2, candidate3, candidate4, candidate5)
+        if min_candidate == candidate1:
+            return round(round(tick / unit_tick) * unit_tick)
+        elif min_candidate == candidate2:
+            return round(round((tick - unit_triplet_tick) / unit_tick) * unit_tick + unit_triplet_tick)
+        elif min_candidate == candidate3:
+            return round(round((tick - 2 * unit_triplet_tick) / unit_tick) * unit_tick + 2 * unit_triplet_tick)
+        elif min_candidate == candidate4:
+            return round(round((tick - 4 * unit_triplet_tick) / unit_tick) * unit_tick + 4 * unit_triplet_tick)
+        else:
+            return round(round((tick - 8 * unit_triplet_tick) / unit_tick) * unit_tick + 8 * unit_triplet_tick)
+        """
+
+    def duration(note_start, note_end, rest_end):
+        tpb = midi.ticks_per_beat
+        round_start = round_tick(note_start)
+        round_mid = round_tick(note_end)
+        round_end = round_tick(rest_end)
+        note = round_mid - round_start
+        rest = round_end - round_mid
+        unit_tick = tpb / 8             # 32nd note
+        """
+        unit_triplet_tick = tpb / 6     # (8/3)th note
+        
+        # chech if triplet
+        is_triplet = False
+        if not round_start % unit_tick == 0 or not round_end % unit_tick == 0:
+            is_triplet = True
+            unit_tick = unit_triplet_tick
+        """
+
+        # TODO: 음표와 쉼표 길이를 구해서, VexFlow의 음표 길이 표현법으로 반환하기
+        # Do not consider tuplets
+
+        return 'q', 'q'
+
+    voices = []
+    count = 0
+    for note in notes:
+        note["ID"] = count
+        count = count + 1
+        temp_voices = []
+        for v_info in voices:
+            if v_info['Channel'] == note['Channel']:
+                # 틱 수 비교할 때 최소 리듬 단위의 배수로 반올림하여 계산
+                if round_tick(v_info['Notes'][-1]['Start_tick']) == round_tick(note['Start_tick']) and \
+                    round_tick(v_info['Notes'][-1]['End_tick']) == round_tick(note['End_tick']):
+                    # Is_chord == True
+                    temp_voices.append((v_info, abs(v_info['Notes'][-1]['Note_position'] - note['Note_position']), True))
+                elif round_tick(v_info['Notes'][-1]['End_tick']) <= round_tick(note['Start_tick']):
+                    # Is_chord == False
+                    temp_voices.append((v_info, abs(v_info['Notes'][-1]['Note_position'] - note['Note_position']), False))
+        if len(temp_voices) == 0:
+            # new voice
+            note['Voice'] = len(voices)
+            voices.append({'Channel': note['Channel'], 'Notes': [note], 'Start': round_tick(note['Start_tick']), 'End': note['End_tick']})
+        else:
+            def take_second(element):
+                return element[1]
+            temp_voices.sort(key=take_second)   # choose voice such that the last note's position is nearest to `note`'s position
+            if temp_voices[0][2]:
+                note['Is_chord'] = True
+            else:
+                # 바로 이전에 이 성부에 할당되었던 화음이 아닌 음표와, 뒤따르는 쉼표의 duration 결정
+                last = -1
+                while len(voices[voices.index(temp_voices[0][0])]['Notes']) >= -1 * last and \
+                    notes[voices[voices.index(temp_voices[0][0])]['Notes'][last]['ID']]['Note_duration'] == '':
+                    old_start = voices[voices.index(temp_voices[0][0])]['Start']
+                    old_end = voices[voices.index(temp_voices[0][0])]['End']
+                    new_start = round_tick(note['Start_tick'])
+                    old_id = voices[voices.index(temp_voices[0][0])]['Notes'][last]['ID']
+                    if not old_id == notes[old_id]['ID']:
+                        print("ID error!")
+                    notes[old_id]['Note_duration'], notes[old_id]['Following_rest_duration'] = \
+                        duration(old_start, old_end, new_start)
+                    last = last - 1
+
+                voices[voices.index(temp_voices[0][0])]['Start'] = round_tick(note['Start_tick'])
+                voices[voices.index(temp_voices[0][0])]['End'] = note['End_tick']
+            note['Voice'] = voices.index(temp_voices[0][0])
+            voices[voices.index(temp_voices[0][0])]['Notes'].append(note)
+    # 각 voices별로 마지막 음표와 이와 화음인 음표들의 길이, 이에 뒤따르는 쉼표 길이를 곡이 끝나는 시점을 이용해서 구하기
+    for voice in voices:
+        last = -1
+        while len(voice['Notes']) >= -1 * last and \
+            notes[voice['Notes'][last]['ID']]['Note_duration'] == '':
+            notes[voice['Notes'][last]['ID']]['Note_duration'], notes[voice['Notes'][last]['ID']]['Following_rest_duration'] = \
+                duration(voice['Start'], voice['End'], end_of_track)
+            last = last - 1
+
+    return events, notes, midi.ticks_per_beat, voices
 
 """
 def event2vec(event):
@@ -262,7 +373,7 @@ def translate_dir_json(in_dir, out_file_list):
         if not (in_dir[-1] == '\\' or in_dir[-1] == '/'):
             in_dir = in_dir + '/'
         try:
-            events, notes, ticks_per_beat = parse_events(in_dir.replace('\\', '/')+in_path)
+            events, notes, ticks_per_beat, voices = parse_events(in_dir.replace('\\', '/')+in_path)
         except IOError as e:
             print(e)
             continue
@@ -270,7 +381,8 @@ def translate_dir_json(in_dir, out_file_list):
             'Filename': fname,
             'Ticks_per_beat': ticks_per_beat,
             'Events': events,
-            'Notes': notes
+            'Notes': notes,
+            'Voices': list(map(lambda e: e['Channel'], voices))
         }
         file_list.append(fname)
         f = open(fname + '.json', 'w')
