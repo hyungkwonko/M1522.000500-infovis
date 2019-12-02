@@ -43,6 +43,8 @@ export class Seijun2Component implements OnInit, AfterViewInit {
   private xAxis: any;
   private yAxis: any;
 
+  @Input() public aa = "hello";
+
 
   constructor() { }
 
@@ -153,6 +155,10 @@ export class Seijun2Component implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
+    console.log(alb_esp5);
+    
+
+    // console.log(this.aa);
     this.generateList();
     this.generatePitchOctave();
     this.generateData();
@@ -160,6 +166,14 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     if (this.data) {
       this.updateChart();
     }
+  }
+
+  ngOnChanges(changes) {
+    console.log(changes);
+    console.log(changes.aa.currentValue);
+    console.log(changes.aa.previousValue);
+    console.log("this is ngOnChange function");
+    // this.childFunction()
   }
 
   createChart() {
@@ -223,9 +237,9 @@ export class Seijun2Component implements OnInit, AfterViewInit {
 
   updateChart() {
     this.mold = alb_esp2;
-    console.log('xxxx');
-    console.log(this.mold);
-    console.log(this.zz);
+    // console.log('xxxx');
+    // console.log(this.mold);
+    // console.log(this.zz);
 
     // // update scales & axis
     this.xScale.domain(this.pitch.map(d => d));
