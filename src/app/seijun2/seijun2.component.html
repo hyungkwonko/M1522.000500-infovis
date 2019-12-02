@@ -2,9 +2,13 @@
 <div class="dm-chart" #svgRef></div>
 <mat-form-field>
   <mat-label>Choose music</mat-label>
-  <mat-select>
+  <mat-select ngModel (ngModelChange)="updateChart($event)" [(ngModel)]="zz">
+  <!-- <mat-select ngModel [(ngModel)]="chosenData"> -->
     <mat-option *ngFor="let v of files" [value]="v">
       {{v}}
     </mat-option>
   </mat-select>
 </mat-form-field>
+<!-- <select ngModel (ngModelChange)="mySelectHandler($event)">
+  <option *ngFor="let value of options" [ngValue]="value">{{value.text}}</option>
+</select> -->

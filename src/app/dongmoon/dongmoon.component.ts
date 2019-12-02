@@ -58,7 +58,7 @@ export class DongmoonComponent implements OnInit, AfterViewInit {
     let element: any = this.svgDM.nativeElement;
     this.width = element.offsetWidth - this.margin.left - this.margin.right;
     this.height = element.offsetHeight - this.margin.top - this.margin.bottom;
-    let svg = d3.select(element).append('svg')
+    let svg: any = d3.select(element).append('svg')
       .attr('width', element.offsetWidth)
       .attr('height', element.offsetHeight);
 

@@ -1,15 +1,19 @@
-import { Component, ViewEncapsulation, OnInit, ViewChild, Input, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, ElementRef, AfterViewInit } from '@angular/core';
 import * as d3 from 'd3';
 
 // https://bl.ocks.org/LemoNode/5a64865728c6059ed89388b5f83d6b67
 // https://stackblitz.com/edit/angular-d3-v4-barchart
 // https://observablehq.com/@d3/stacked-bar-chart
 
-import alb_esp1 from  '../../../Preprocessing/preprocessed/data/alb_esp1.json';
-import file_list from  '../../../Preprocessing/preprocessed/file_list.json';
+import file_list from '../../../Preprocessing/preprocessed/file_list.json';
+import alb_esp1 from '../../../Preprocessing/preprocessed/data/alb_esp1.json';
+import alb_esp2 from '../../../Preprocessing/preprocessed/data/alb_esp2.json';
+import alb_esp3 from '../../../Preprocessing/preprocessed/data/alb_esp3.json';
+import alb_esp4 from '../../../Preprocessing/preprocessed/data/alb_esp4.json';
+import alb_esp5 from '../../../Preprocessing/preprocessed/data/alb_esp5.json';
+
+
 import * as _ from 'lodash';
-
-
 
 @Component({
   selector: 'app-seijun2',
@@ -20,12 +24,25 @@ export class Seijun2Component implements OnInit, AfterViewInit {
 
   @ViewChild('svgRef', {static: false}) svgRef: ElementRef;
   @Input() public data: Array<any> = [];
+  public mold = alb_esp1;
   public pitch: Array<any> = [];
   public octave: Array<any> = [];
-  public title: string = 'Stacked Bar Chart';
+  public title = 'Stacked Bar Chart';
   public keys: Array<any> = [];
   public len: number;
   public files: Array<any> = [];
+  public zz;
+
+  private margin: any = { top: 20, bottom: 20, left: 20, right: 20};
+  private chart: any;
+  private width: number;
+  private height: number;
+  private xScale: any;
+  private yScale: any;
+  private colors: any;
+  private xAxis: any;
+  private yAxis: any;
+
 
   constructor() { }
 
@@ -37,7 +54,7 @@ export class Seijun2Component implements OnInit, AfterViewInit {
 
   // sort out unique pitches
   public generatePitchOctave() {
-    alb_esp1.Notes.forEach(d => {
+    this.mold.Notes.forEach(d => {
       if (this.pitch.indexOf(d.Note_pitch_class) === -1) {
         this.pitch.push(d.Note_pitch_class);
       }
@@ -49,26 +66,27 @@ export class Seijun2Component implements OnInit, AfterViewInit {
 
   public generateData() {
     // make subset (key: "Note_pitch_class", "Note_octave")
-    let subsets: Array<any> = _.map(alb_esp1.Notes, function(e) {
+    let subsets: Array<any> = _.map(this.mold.Notes, function(e) {
       return _.pick(e, 'Note_pitch_class', 'Note_octave');
     });
-    
+
     // add count key (key: "Note_pitch_class", "Note_octave", "count")
-    subsets.forEach((d) => d["count"] = 1);
-    
+    subsets.forEach((d) => d.count = 1);
+
     // aggregate count by groups (Note_pitch_class & Note_octave)
-    let result: any = Object.values(subsets.reduce(function(r, e) {
-      let key = e.Note_pitch_class + '|' + e.Note_octave;
-      if (!r[key]) r[key] = e;
-      else {
+    const result: any = Object.values(subsets.reduce(function(r, e) {
+      const key = e.Note_pitch_class + '|' + e.Note_octave;
+      if (!r[key]) {
+        r[key] = e;
+      } else {
         r[key].count += e.count;
       }
       return r;
-    }, {}))
+    }, {}));
 
-    // make new key    
+    // make new key
     result.forEach((d) => {
-      d["Note_octave" + d["Note_octave"]] = d["count"]
+      d['Note_octave' + d.Note_octave] = d.count;
     });
 
     // exclude keys (key: "count", "Note_octave")
@@ -77,11 +95,13 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     });
 
     // aggregate by key: "Note_pitch_class"
-    let subsets_a = _.map(_.groupBy(subsets, "Note_pitch_class"), function(vals, id) {
-      return _.reduce(vals, function(m, o) {
-        for (var p in o)
-          if (p != "Note_pitch_class")
-            m[p] = (m[p]||0) + o[p];
+    let subsets_a = _.map(_.groupBy(subsets, 'Note_pitch_class'), (vals, id) => {
+      return _.reduce(vals, (m, o) => {
+        for (const p in o) {
+          if (p != 'Note_pitch_class') {
+            m[p] = (m[p] || 0) + o[p];
+          }
+        }
         return m;
       }, {Note_pitch_class: id});
     });
@@ -96,17 +116,18 @@ export class Seijun2Component implements OnInit, AfterViewInit {
 
     // rename key: 'Note_pitch_class'
     for (let obj of subsets_a) {
-      obj['Class'] = obj['Note_pitch_class'];
-      delete obj['Note_pitch_class'];
+      obj['Class'] = obj.Note_pitch_class;
+      delete obj.Note_pitch_class;
     }
-    
+
     // JSON as array
-    this.keys = Object.keys(subsets_a[0]).sort()
-    this.len = Object.keys(subsets_a[0]).length
+    this.keys = Object.keys(subsets_a[0]).sort();
+    this.len = Object.keys(subsets_a[0]).length;
     let tmp = [];
+
     // let sum: number = 0;
     subsets_a.forEach(e => {
-      for(let i=0; i<this.len; i++) {
+      for(let i = 0 ; i < this.len; i++) {
         tmp.push(e[this.keys[i]]);
         // if(i > 0)
         //   sum += e[this.keys[i]];
@@ -136,23 +157,12 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     this.generatePitchOctave();
     this.generateData();
     this.createChart();
-    // if (this.data) {
-    //   this.updateChart();
-    // }
+    if (this.data) {
+      this.updateChart();
+    }
   }
-  
-  private margin: any = { top: 20, bottom: 20, left: 20, right: 20};
-  private chart: any;
-  private width: number;
-  private height: number;
-  private xScale: any;
-  private yScale: any;
-  private colors: any;
-  private xAxis: any;
-  private yAxis: any;
-  
+
   createChart() {
-    
     let element: any = this.svgRef.nativeElement;
     this.width = element.offsetWidth - this.margin.left - this.margin.right;
     this.height = element.offsetHeight - this.margin.top - this.margin.bottom;
@@ -164,13 +174,12 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     this.chart = svg.append('g')
       .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`);
       // .attr('class', 'bars')
-    
 
     // define X & Y domains
     let xDomain: any = this.pitch.map(d => d);
     let yDomain: any = [0, d3.max(this.data, d => d3.max(d, d => d[1]))]; // MAX: 142
     // let yDomain: any = [0, d3.max(this.data, d => d[0])];
-    
+
     // create scales
     this.xScale = d3.scaleBand()
       .domain(xDomain)
@@ -185,7 +194,7 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     this.colors = d3.scaleOrdinal()
       .domain(this.data.map(d => d.key))
       .range(d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), this.data.length).reverse())
-      .unknown("#ccc")
+      .unknown('#ccc')
 
     // x & y axis
     this.xAxis = svg.append('g')
@@ -198,21 +207,26 @@ export class Seijun2Component implements OnInit, AfterViewInit {
       .call(d3.axisLeft(this.yScale));
 
 
-    this.chart.selectAll("g")
+    this.chart.selectAll('g')
       .data(this.data)
-      .join("g")
-        .attr("fill", d => this.colors(d.key))
-      .selectAll("rect")
+      .join('g')
+        .attr('fill', d => this.colors(d.key))
+      .selectAll('rect')
       .data(d => d)
-      .join("rect")
-        .attr("x", (d, i) => this.xScale(d.data.Class))
-        .attr("y", d => this.yScale(d[1]))
-        .attr("height", d => this.yScale(d[0]) - this.yScale(d[1]))
-        .attr("width", this.xScale.bandwidth());
+      .join('rect')
+        .attr('x', (d, i) => this.xScale(d.data.Class))
+        .attr('y', d => this.yScale(d[1]))
+        .attr('height', d => this.yScale(d[0]) - this.yScale(d[1]))
+        .attr('width', this.xScale.bandwidth());
 
   }
 
   updateChart() {
+    this.mold = alb_esp2;
+    console.log('xxxx');
+    console.log(this.mold);
+    console.log(this.zz);
+
     // // update scales & axis
     this.xScale.domain(this.pitch.map(d => d));
     this.yScale.domain([0, d3.max(this.data, d => d3.max(d, d => d[1]))]);
@@ -220,7 +234,7 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     this.xAxis.transition().call(d3.axisBottom(this.xScale));
     this.yAxis.transition().call(d3.axisLeft(this.yScale));
 
-    let update = this.chart.selectAll('g')
+    const update = this.chart.selectAll('g')
       .data(this.data);
 
     // remove exiting bars
