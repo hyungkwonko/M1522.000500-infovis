@@ -1,3 +1,6 @@
+#!/usr/bin/python
+# coding: utf-8
+
 from mido import MidiFile, merge_tracks
 # import numpy as np
 from os import listdir
@@ -237,7 +240,7 @@ def parse_events(f):
             unit_tick = unit_triplet_tick
         """
 
-        # TODO: 음표와 쉼표 길이를 구해서, VexFlow의 음표 길이 표현법으로 반환하기
+        # 음표와 쉼표 길이를 구해서, VexFlow의 음표 길이 표현법으로 반환하기
         # Do not consider tuplets
         M = min(round(1.34 * N), N + R)
         if N == M:
@@ -256,7 +259,7 @@ def parse_events(f):
                 return duration_notation(note_duration, False), duration_notation(N + R - note_duration, True)
 
         print("Duration error!")
-        return ['4'], ['4r']
+        return [], []
 
     voices = []
     count = 0
