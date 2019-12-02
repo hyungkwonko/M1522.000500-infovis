@@ -145,8 +145,8 @@ def parse_events(f):
                 'Note_velocity': event['Note_velocity'],
                 'Note_pitch_class': '',
                 'Note_octave': -1,
-                'Note_duration': '',
-                'Following_rest_duration': ''
+                'Note_duration': [],
+                'Following_rest_duration': []
             })
             note_id = note_id + 1
         elif event['Type'] == 'note_off':
@@ -193,13 +193,39 @@ def parse_events(f):
             return round(round((tick - 8 * unit_triplet_tick) / unit_tick) * unit_tick + 8 * unit_triplet_tick)
         """
 
+    def duration_notation(duration_tick, is_rest):
+        n = round_tick(duration_tick) * 8 / midi.ticks_per_beat
+        durations = []
+        twos = []
+        for i in [32, 16, 8, 4, 2, 1]:
+            twos.append(round(n // i))
+            n = n % i
+        succession = False
+        for i in range(0, 6):
+            if i == 0:
+                for _ in range(0, twos[0]):
+                    durations.append('1')
+                    succession = True
+            elif twos[i] == 1:
+                if succession:
+                    durations[-1] = durations[-1] + 'd'
+                else:
+                    durations.append(str(pow(2, i)))
+                    succession = True
+            else:
+                succession = False
+        if is_rest:
+            for i in range(0, len(durations)):
+                durations[i] = durations[i] + 'r'
+        return durations
+
     def duration(note_start, note_end, rest_end):
         tpb = midi.ticks_per_beat
         round_start = round_tick(note_start)
         round_mid = round_tick(note_end)
         round_end = round_tick(rest_end)
-        note = round_mid - round_start
-        rest = round_end - round_mid
+        N = round_mid - round_start
+        R = round_end - round_mid
         unit_tick = tpb / 8             # 32nd note
         """
         unit_triplet_tick = tpb / 6     # (8/3)th note
@@ -213,8 +239,24 @@ def parse_events(f):
 
         # TODO: 음표와 쉼표 길이를 구해서, VexFlow의 음표 길이 표현법으로 반환하기
         # Do not consider tuplets
+        M = min(round(1.34 * N), N + R)
+        if N == M:
+            # R == 0
+            return duration_notation(N, False), []
+        unit_N = N / unit_tick
+        unit_M = M / unit_tick
+        k = 0
+        while pow(2, k) <= unit_M:
+            k = k + 1
+        while k >= 1:
+            k = k - 1
+            unit_note_duration = (unit_M // pow(2, k)) * pow(2, k)
+            if unit_note_duration >= unit_N:
+                note_duration = round_tick(unit_note_duration * unit_tick)
+                return duration_notation(note_duration, False), duration_notation(N + R - note_duration, True)
 
-        return 'q', 'q'
+        print("Duration error!")
+        return ['4'], ['4r']
 
     voices = []
     count = 0
@@ -246,7 +288,7 @@ def parse_events(f):
                 # 바로 이전에 이 성부에 할당되었던 화음이 아닌 음표와, 뒤따르는 쉼표의 duration 결정
                 last = -1
                 while len(voices[voices.index(temp_voices[0][0])]['Notes']) >= -1 * last and \
-                    notes[voices[voices.index(temp_voices[0][0])]['Notes'][last]['ID']]['Note_duration'] == '':
+                    len(notes[voices[voices.index(temp_voices[0][0])]['Notes'][last]['ID']]['Note_duration']) == 0:
                     old_start = voices[voices.index(temp_voices[0][0])]['Start']
                     old_end = voices[voices.index(temp_voices[0][0])]['End']
                     new_start = round_tick(note['Start_tick'])
@@ -265,7 +307,7 @@ def parse_events(f):
     for voice in voices:
         last = -1
         while len(voice['Notes']) >= -1 * last and \
-            notes[voice['Notes'][last]['ID']]['Note_duration'] == '':
+            len(notes[voice['Notes'][last]['ID']]['Note_duration']) == 0:
             notes[voice['Notes'][last]['ID']]['Note_duration'], notes[voice['Notes'][last]['ID']]['Following_rest_duration'] = \
                 duration(voice['Start'], voice['End'], end_of_track)
             last = last - 1
