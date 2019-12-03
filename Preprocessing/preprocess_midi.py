@@ -8,6 +8,7 @@ from os.path import exists
 # import csv
 import sys
 import json
+import copy
 
 def pitch_class(note_position):
     p = note_position % 12
@@ -26,6 +27,25 @@ def pitch_class(note_position):
         11: 'B'
     }
     return switcher.get(p)
+
+
+def pitch_class_to_lower(pitch_class):
+    switcher = {
+      'C': 'c',
+      'C#': 'c#',
+      'D': 'd',
+      'D#': 'd#',
+      'E': 'e',
+      'F': 'f',
+      'F#': 'f#',
+      'G': 'g',
+      'G#': 'g#',
+      'A': 'a',
+      'A#': 'a#',
+      'B': 'b'
+    }
+    return switcher.get(pitch_class)
+
 
 def parse_events(f):
     midi = MidiFile(f)
@@ -174,6 +194,30 @@ def parse_events(f):
         return element["Start_tick"]
     notes.sort(key=take_start_tick)
 
+    def round_tick(tick):
+        tpb = midi.ticks_per_beat
+        unit_tick = tpb / 8  # 32nd note
+        return round(round(tick / unit_tick) * unit_tick)
+        """
+            unit_triplet_tick = tpb / 6     # (8/3)th note
+            candidate1 = abs((tick / unit_tick) - round(tick / unit_tick))
+            candidate2 = abs(((tick - unit_triplet_tick) / unit_tick) - round((tick - unit_triplet_tick) / unit_tick))
+            candidate3 = abs(((tick - 2 * unit_triplet_tick) / unit_tick) - round((tick - 2 * unit_triplet_tick) / unit_tick))
+            candidate4 = abs(((tick - 4 * unit_triplet_tick) / unit_tick) - round((tick - 4 * unit_triplet_tick) / unit_tick))
+            candidate5 = abs(((tick - 8 * unit_triplet_tick) / unit_tick) - round((tick - 8 * unit_triplet_tick) / unit_tick))
+            min_candidate = min(candidate1, candidate2, candidate3, candidate4, candidate5)
+            if min_candidate == candidate1:
+                return round(round(tick / unit_tick) * unit_tick)
+            elif min_candidate == candidate2:
+                return round(round((tick - unit_triplet_tick) / unit_tick) * unit_tick + unit_triplet_tick)
+            elif min_candidate == candidate3:
+                return round(round((tick - 2 * unit_triplet_tick) / unit_tick) * unit_tick + 2 * unit_triplet_tick)
+            elif min_candidate == candidate4:
+                return round(round((tick - 4 * unit_triplet_tick) / unit_tick) * unit_tick + 4 * unit_triplet_tick)
+            else:
+                return round(round((tick - 8 * unit_triplet_tick) / unit_tick) * unit_tick + 8 * unit_triplet_tick)
+            """
+
     current_numerator = 4     # default time signature (4/4)
     current_denominator = 4   # default time signature (4/4)
     notations = []
@@ -200,14 +244,14 @@ def parse_events(f):
               'Tick': temp_tick,
               'Options': {'type': 'single'}
             })
-        elif next_bar_tick < time_sigs[time_sigs_index]['Tick']:
+        elif next_bar_tick < round_tick(time_sigs[time_sigs_index]['Tick']):
             temp_tick = next_bar_tick
             notations.append({
               'Type': 'bar',
               'Tick': temp_tick,
               'Options': {'type': 'single'}
             })
-        elif next_bar_tick == time_sigs[time_sigs_index]['Tick']:
+        elif next_bar_tick == round_tick(time_sigs[time_sigs_index]['Tick']):
             temp_tick = next_bar_tick
             notations.append({
               'Type': 'bar',
@@ -224,7 +268,7 @@ def parse_events(f):
             current_denominator = time_sigs[time_sigs_index]['Denominator']
             time_sigs_index = time_sigs_index + 1
         else:
-            temp_tick = time_sigs[time_sigs_index]['Tick']
+            temp_tick = round_tick(time_sigs[time_sigs_index]['Tick'])
             if not temp_tick == 0:
                 notations.append({
                   'Type': 'bar',
@@ -258,40 +302,17 @@ def parse_events(f):
 
     key_sigs = list(map(lambda e: {
         'Type': 'key_signature',
-        'Tick': e['Tick'],
+        'Tick': round_tick(e['Tick']),
         'Options': e['Key']
     }, list(filter(lambda e: e['Type'] == 'key_signature', events))))
     set_tempos = list(map(lambda e: {
         'Type': 'set_tempo',
-        'Tick': e['Tick'],
+        'Tick': round_tick(e['Tick']),
         'Options': e['Tempo']
     }, list(filter(lambda e: e['Type'] == 'set_tempo', events))))
     notations = notations + key_sigs + set_tempos
     notations.sort(key=lambda e: (e['Tick'], ordering_notations(e)))
 
-    def round_tick(tick):
-        tpb = midi.ticks_per_beat
-        unit_tick = tpb / 8             # 32nd note
-        return round(round(tick / unit_tick) * unit_tick)
-        """
-        unit_triplet_tick = tpb / 6     # (8/3)th note
-        candidate1 = abs((tick / unit_tick) - round(tick / unit_tick))
-        candidate2 = abs(((tick - unit_triplet_tick) / unit_tick) - round((tick - unit_triplet_tick) / unit_tick))
-        candidate3 = abs(((tick - 2 * unit_triplet_tick) / unit_tick) - round((tick - 2 * unit_triplet_tick) / unit_tick))
-        candidate4 = abs(((tick - 4 * unit_triplet_tick) / unit_tick) - round((tick - 4 * unit_triplet_tick) / unit_tick))
-        candidate5 = abs(((tick - 8 * unit_triplet_tick) / unit_tick) - round((tick - 8 * unit_triplet_tick) / unit_tick))
-        min_candidate = min(candidate1, candidate2, candidate3, candidate4, candidate5)
-        if min_candidate == candidate1:
-            return round(round(tick / unit_tick) * unit_tick)
-        elif min_candidate == candidate2:
-            return round(round((tick - unit_triplet_tick) / unit_tick) * unit_tick + unit_triplet_tick)
-        elif min_candidate == candidate3:
-            return round(round((tick - 2 * unit_triplet_tick) / unit_tick) * unit_tick + 2 * unit_triplet_tick)
-        elif min_candidate == candidate4:
-            return round(round((tick - 4 * unit_triplet_tick) / unit_tick) * unit_tick + 4 * unit_triplet_tick)
-        else:
-            return round(round((tick - 8 * unit_triplet_tick) / unit_tick) * unit_tick + 8 * unit_triplet_tick)
-        """
 
     def duration_notation(duration_tick, is_rest):
         n = round_tick(duration_tick) * 8 / midi.ticks_per_beat
@@ -368,7 +389,7 @@ def parse_events(f):
     for note in notes:
         note["ID"] = count
         count = count + 1
-        temp_voices = []
+        temp_voices = []    # 이 음표가 할당될 수 있는 voice 후보들
         for v_info in voices:
             if v_info['Channel'] == note['Channel']:
                 # 틱 수 비교할 때 최소 리듬 단위의 배수로 반올림하여 계산
@@ -390,10 +411,14 @@ def parse_events(f):
             # choose voice such that the last note's position is nearest to `note`'s position
             temp_voices.sort(key=take_second)
             if temp_voices[0][2]:
+                # 선택된 voice에 가장 마지막으로 들어간 음표가 이 음과 화음인 경우
                 note['Is_chord'] = True
             else:
+                # 선택된 voice에 가장 마지막으로 들어간 음표가 이 음과 화음이 아닌 경우
                 # 바로 이전에 이 성부에 할당되었던 화음이 아닌 음표와, 뒤따르는 쉼표의 duration 결정
                 last = -1
+                IDs = []
+                keys = []
                 while len(voices[voices.index(temp_voices[0][0])]['Notes']) >= -1 * last and \
                     notes[voices[voices.index(temp_voices[0][0])]['Notes'][last]['ID']]['Note_duration'] == 0:
                     old_start = voices[voices.index(temp_voices[0][0])]['Start']
@@ -405,17 +430,29 @@ def parse_events(f):
                     notes[old_id]['Note_duration'], notes[old_id]['Following_rest_duration'] = \
                         duration(old_start, old_end, new_start)
                     if not notes[old_id]['Note_duration'] == 0:
-                        note_notations.append({
-                            'Type': 'note',
-                            'Tick': round_tick(notes[old_id]['Start_tick']),
-                            'End_tick': round_tick(notes[old_id]['Start_tick']) + notes[old_id]['Note_duration'],
-                            'ID': notes[old_id]['ID'],
-                            'Key': notes[old_id]['Note_pitch_class'] + '/' + str(notes[old_id]['Note_octave']),
-                            'Is_chord': notes[old_id]['Is_chord'],
-                            'Channel': notes[old_id]['Channel'],
-                            'Voice': notes[old_id]['Voice'],
-                            'Options': {}
-                        })
+                        if not notes[old_id]['Is_chord']:
+                            IDs.insert(0, notes[old_id]['ID'])
+                            keys.insert(0, pitch_class_to_lower(notes[old_id]['Note_pitch_class']) + '/' +
+                                        str(notes[old_id]['Note_octave']))
+                            note_notations.append({
+                                'Type': 'note',
+                                'Tick': round_tick(notes[old_id]['Start_tick']),
+                                'End_tick': round_tick(notes[old_id]['Start_tick']) + notes[old_id]['Note_duration'],
+                                'IDs': IDs,
+                                'Keys': keys,
+                                'Channel': notes[old_id]['Channel'],
+                                'Voice': notes[old_id]['Voice'],
+                                'Options': {}
+                            })
+                            IDs = []
+                            keys = []
+                            # TODO: end of tie
+                        else:
+                            IDs.insert(0, notes[old_id]['ID'])
+                            keys.insert(0, pitch_class_to_lower(notes[old_id]['Note_pitch_class']) + '/' +
+                                        str(notes[old_id]['Note_octave']))
+                            # TODO: start or middle of tie
+
                     if not notes[old_id]['Following_rest_duration'] == 0 and not notes[old_id]['Is_chord']:
                         note_notations.append({
                             'Type': 'rest',
@@ -431,26 +468,51 @@ def parse_events(f):
                 voices[voices.index(temp_voices[0][0])]['End'] = note['End_tick']
             note['Voice'] = voices.index(temp_voices[0][0])
             voices[voices.index(temp_voices[0][0])]['Notes'].append(note)
-    # 각 voices별로 마지막 음표와 이와 화음인 음표들의 길이, 이에 뒤따르는 쉼표 길이를 곡이 끝나는 시점을 이용해서 구하기
+
     for voice in voices:
+        # 어떤 voice에서 처음 등장하는 음표의 시작 위치가 곡의 시작이 아닌 경우 맨 앞에 쉼표 추가
+        if len(voice['Notes']) >= 1 and notes[voice['Notes'][0]['ID']]['Start_tick'] > 0:
+            note_notations.append({
+                'Type': 'rest',
+                'Tick': 0,
+                'End_tick': round_tick(notes[voice['Notes'][0]['ID']]['Start_tick']),
+                'Channel': notes[voice['Notes'][0]['ID']]['Channel'],
+                'Voice': notes[voice['Notes'][0]['ID']]['Voice'],
+                'Options': {}
+            })
+        # 각 voices별로 마지막 음표와 이와 화음인 음표들의 길이, 이에 뒤따르는 쉼표 길이를 곡이 끝나는 시점을 이용해서 구하기
         last = -1
+        IDs = []
+        keys = []
         while len(voice['Notes']) >= -1 * last and \
             notes[voice['Notes'][last]['ID']]['Note_duration'] == 0:
             old_id = voice['Notes'][last]['ID']
             notes[old_id]['Note_duration'], notes[old_id]['Following_rest_duration'] = \
                 duration(voice['Start'], voice['End'], end_of_track)
             if not notes[old_id]['Note_duration'] == 0:
-                note_notations.append({
-                    'Type': 'note',
-                    'Tick': round_tick(notes[old_id]['Start_tick']),
-                    'End_tick': round_tick(notes[old_id]['Start_tick']) + notes[old_id]['Note_duration'],
-                    'ID': notes[old_id]['ID'],
-                    'Key': notes[old_id]['Note_pitch_class'] + '/' + str(notes[old_id]['Note_octave']),
-                    'Is_chord': notes[old_id]['Is_chord'],
-                    'Channel': notes[old_id]['Channel'],
-                    'Voice': notes[old_id]['Voice'],
-                    'Options': {}
-                })
+                if not notes[old_id]['Is_chord']:
+                    IDs.insert(0, notes[old_id]['ID'])
+                    keys.insert(0, pitch_class_to_lower(notes[old_id]['Note_pitch_class']) + '/' +
+                                str(notes[old_id]['Note_octave']))
+                    note_notations.append({
+                        'Type': 'note',
+                        'Tick': round_tick(notes[old_id]['Start_tick']),
+                        'End_tick': round_tick(notes[old_id]['Start_tick']) + notes[old_id]['Note_duration'],
+                        'IDs': IDs,
+                        'Keys': keys,
+                        'Channel': notes[old_id]['Channel'],
+                        'Voice': notes[old_id]['Voice'],
+                        'Options': {}
+                    })
+                    IDs = []
+                    keys = []
+                    # TODO: end of tie
+                else:
+                    IDs.insert(0, notes[old_id]['ID'])
+                    keys.insert(0, pitch_class_to_lower(notes[old_id]['Note_pitch_class']) + '/' +
+                                str(notes[old_id]['Note_octave']))
+                    # TODO: start or middle of tie
+
             if not notes[old_id]['Following_rest_duration'] == 0 and not notes[old_id]['Is_chord']:
                 note_notations.append({
                     'Type': 'rest',
@@ -462,7 +524,95 @@ def parse_events(f):
                 })
             last = last - 1
 
-    return events, notes, midi.ticks_per_beat, voices, notations, note_notations
+    score = []
+    for i in range(0, len(voices)):
+        voice_notations = list(filter(lambda nn: nn['Voice'] == i, note_notations))
+        voice_notations.sort(key=lambda nn: nn['Tick'])
+        temp_tick = 0
+        i1 = 0
+        i2 = 0
+        # append new voice
+        score.append([{
+            'Type': 'clef',
+            'Tick': 0,
+            'Options': 'treble'
+        }])
+        # this algorithm is similar to merging two sorted lists
+        while i1 < len(notations) and i2 < len(voice_notations):
+            if notations[i1]['Tick'] <= voice_notations[i2]['Tick']:
+                # 음표나 쉼표가 아닌 기호(마디 구분선, 조표, 박자표 등)를 그릴 것
+                score[i].append(notations[i1])
+                i1 = i1 + 1
+            else:
+                # 음표 또는 쉼표를 그릴 것
+                if notations[i1]['Tick'] >= voice_notations[i2]['End_tick']:
+                    # 지금 그리는 음표 또는 쉼표가 끝나고 나서 다른 기호가 오는 경우
+                    if voice_notations[i2]['Type'] == 'rest':
+                        # TODO: list of duration -> multiple rests
+                        voice_notations[i2]['Options'] = {
+                            'keys': ['b/4'],
+                            'duration': duration_notation(voice_notations[i2]['End_tick'] -
+                                                        voice_notations[i2]['Tick'], True)
+                        }
+                    else:
+                        # TODO: list of duration -> multiple notes
+                        voice_notations[i2]['Options'] = {
+                            'clef': 'treble',
+                            'keys': voice_notations[i2]['Keys'],
+                            'duration': duration_notation(voice_notations[i2]['End_tick'] -
+                                                          voice_notations[i2]['Tick'], False)
+                        }
+                        voice_notations[i2].pop('Keys', None)
+                    score[i].append(voice_notations[i2])
+                    i2 = i2 + 1
+                else:
+                    # 지금 그리는 음표 또는 쉼표가 끝나기 전에 다른 기호가 끼어드는 경우
+                    # 음표 또는 쉼표를 두 개로 쪼개고
+                    # 음표의 경우 쪼개진 것들끼리 이음줄로 이어야 한다.
+                    new_note = copy.deepcopy(voice_notations[i2])
+                    new_note['End_tick'] = notations[i1]['Tick']
+                    if new_note['Type'] == 'rest':
+                        # TODO: list of duration -> multiple rests
+                        new_note['Options'] = {
+                            'keys': ['b/4'],
+                            'duration': duration_notation(new_note['End_tick'] -
+                                                          new_note['Tick'], True)
+                        }
+                    else:
+                        # TODO: list of duration -> multiple notes
+                        new_note['Options'] = {
+                            'clef': 'treble',
+                            'keys': new_note['Keys'],
+                            'duration': duration_notation(new_note['End_tick'] -
+                                                          new_note['Tick'], False)
+                        }
+                        new_note.pop('Keys', None)
+                    score[i].append(new_note)
+                    voice_notations[i2]['Tick'] = notations[i1]['Tick']
+
+        while i1 < len(notations):
+            score[i].append(notations[i1])
+            i1 = i1 + 1
+
+        while i2 < len(voice_notations):
+            if voice_notations[i2]['Type'] == 'rest':
+                voice_notations[i2]['Options'] = {
+                    'keys': ['b/4'],
+                    'duration': duration_notation(voice_notations[i2]['End_tick'] -
+                                                  voice_notations[i2]['Tick'], True)
+                }
+            else:
+                voice_notations[i2]['Options'] = {
+                    'clef': 'treble',
+                    'keys': voice_notations[i2]['Keys'],
+                    'duration': duration_notation(voice_notations[i2]['End_tick'] -
+                                                  voice_notations[i2]['Tick'], False)
+                }
+                voice_notations[i2].pop('Keys', None)
+            score[i].append(voice_notations[i2])
+            i2 = i2 + 1
+
+    return events, notes, midi.ticks_per_beat, score
 
 """
 def event2vec(event):
@@ -565,7 +715,7 @@ def translate_dir_json(in_dir, out_file_list):
         if not (in_dir[-1] == '\\' or in_dir[-1] == '/'):
             in_dir = in_dir + '/'
         try:
-            events, notes, ticks_per_beat, voices, notations, note_notations = parse_events(in_dir.replace('\\', '/')+in_path)
+            events, notes, ticks_per_beat, score = parse_events(in_dir.replace('\\', '/')+in_path)
         except IOError as e:
             print(e)
             continue
@@ -574,10 +724,13 @@ def translate_dir_json(in_dir, out_file_list):
             'Ticks_per_beat': ticks_per_beat,
             'Events': events,
             'Notes': notes,
-            'Voices': list(map(lambda e: e['Channel'], voices)),
-            'Notations': notations,
-            'Note_notations': note_notations
+            'Score': score
         }
+        """
+        'Voices': list(map(lambda e: e['Channel'], voices)),
+        'Notations': notations,
+        'Note_notations': note_notations
+        """
         file_list.append(fname)
         f = open(fname + '.json', 'w')
         f.write(json.dumps(data, separators=(',', ':')))
