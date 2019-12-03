@@ -1,3 +1,4 @@
+import { IMusic } from './../music';
 import { Component, OnInit, ViewChild, Input, ElementRef, AfterViewInit } from '@angular/core';
 import * as d3 from 'd3';
 
@@ -23,15 +24,15 @@ import * as _ from 'lodash';
 export class Seijun2Component implements OnInit, AfterViewInit {
 
   @ViewChild('svgRef', {static: false}) svgRef: ElementRef;
-  @Input() public data: Array<any> = [];
-  public mold = alb_esp1;
+  @Input() public mold: IMusic;
+  public data: Array<any> = [];
+
   public pitch: Array<any> = [];
   public octave: Array<any> = [];
   public title = 'Stacked Bar Chart';
   public keys: Array<any> = [];
   public len: number;
   public files: Array<any> = [];
-  public zz;
 
   private margin: any = { top: 20, bottom: 20, left: 20, right: 20};
   private chart: any;
@@ -43,7 +44,6 @@ export class Seijun2Component implements OnInit, AfterViewInit {
   private xAxis: any;
   private yAxis: any;
 
-  @Input() public aa = "hello";
 
 
   constructor() { }
@@ -56,6 +56,8 @@ export class Seijun2Component implements OnInit, AfterViewInit {
 
   // sort out unique pitches
   public generatePitchOctave() {
+    this.pitch = [];
+    this.octave = [];
     this.mold.Notes.forEach(d => {
       if (this.pitch.indexOf(d.Note_pitch_class) === -1) {
         this.pitch.push(d.Note_pitch_class);
@@ -155,10 +157,7 @@ export class Seijun2Component implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
-    console.log(alb_esp5);
-    
-
-    // console.log(this.aa);
+    this.mold = alb_esp1;
     this.generateList();
     this.generatePitchOctave();
     this.generateData();
@@ -166,13 +165,18 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     if (this.data) {
       this.updateChart();
     }
-  }
+}
 
   ngOnChanges(changes) {
-    console.log(changes);
-    console.log(changes.aa.currentValue);
-    console.log(changes.aa.previousValue);
-    console.log("this is ngOnChange function");
+    if (changes.mold.currentValue.Filename) {
+      console.log('change data from ' + changes.mold.previousValue.Filename + ' to ' + changes.mold.currentValue.Filename);
+      this.generatePitchOctave();
+      this.generateData();
+      if (this.data) {
+        this.updateChart();
+      }
+    }
+    console.log(this.mold);
     // this.childFunction()
   }
 
@@ -208,7 +212,7 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     this.colors = d3.scaleOrdinal()
       .domain(this.data.map(d => d.key))
       .range(d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), this.data.length).reverse())
-      .unknown('#ccc')
+      .unknown('#ccc');
 
     // x & y axis
     this.xAxis = svg.append('g')
@@ -220,7 +224,35 @@ export class Seijun2Component implements OnInit, AfterViewInit {
       .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`)
       .call(d3.axisLeft(this.yScale));
 
+    // this.chart.selectAll('g')
+    //   .data(this.data)
+    //   .join('g')
+    //     .attr('fill', d => this.colors(d.key))
+    //   .selectAll('rect')
+    //   .data(d => d)
+    //   .join('rect')
+    //     .attr('x', (d, i) => this.xScale(d.data.Class))
+    //     .attr('y', d => this.yScale(d[1]))
+    //     .attr('height', d => this.yScale(d[0]) - this.yScale(d[1]))
+    //     .attr('width', this.xScale.bandwidth());
 
+  }
+
+  updateChart() {
+    // // update scales & axis
+    this.xScale.domain(this.pitch.map(d => d));
+    this.yScale.domain([0, d3.max(this.data, d => d3.max(d, d => d[1]))]);
+    console.log(this.data);
+    this.colors.domain(this.data.map(d => d.key));
+    this.xAxis.transition().call(d3.axisBottom(this.xScale));
+    this.yAxis.transition().call(d3.axisLeft(this.yScale));
+
+    // const update = this.chart.selectAll('g');
+
+    // remove exiting bars
+    // update.exit().remove();
+
+    // update existing bars
     this.chart.selectAll('g')
       .data(this.data)
       .join('g')
@@ -228,57 +260,41 @@ export class Seijun2Component implements OnInit, AfterViewInit {
       .selectAll('rect')
       .data(d => d)
       .join('rect')
+        .transition()
         .attr('x', (d, i) => this.xScale(d.data.Class))
         .attr('y', d => this.yScale(d[1]))
         .attr('height', d => this.yScale(d[0]) - this.yScale(d[1]))
         .attr('width', this.xScale.bandwidth());
 
-  }
-
-  updateChart() {
-    this.mold = alb_esp2;
-    // console.log('xxxx');
-    // console.log(this.mold);
-    // console.log(this.zz);
-
-    // // update scales & axis
-    this.xScale.domain(this.pitch.map(d => d));
-    this.yScale.domain([0, d3.max(this.data, d => d3.max(d, d => d[1]))]);
-    this.colors.domain(this.data.map(d => d.key));
-    this.xAxis.transition().call(d3.axisBottom(this.xScale));
-    this.yAxis.transition().call(d3.axisLeft(this.yScale));
-
-    const update = this.chart.selectAll('g')
-      .data(this.data);
-
-    // remove exiting bars
-    update.exit().remove();
-
-    // update existing bars
-    this.chart.selectAll('g')
-      .transition()
-      .attr('x', d => this.xScale(d.Class))
-      .attr('y', d => this.yScale(d[1]))
-      .attr('width', d => this.xScale.bandwidth())
-      .attr('height', d => 120)
-      // .attr('height', d => this.yScale(d[1]) - this.yScale(d[0]))
-      .style('fill', (d, i) => this.colors(d.key));
+    // this.chart.selectAll('g')
+    //   .data(this.data)
+    //     .join('g')
+    //   .selectAll('rect')
+    //   .data(d => d)
+    //   .join('rect')
+    //   .transition()
+    //   .attr('x', d => this.xScale(d.Class))
+    //   .attr('y', d => this.yScale(d[1]))
+    //   .attr('width', d => this.xScale.bandwidth())
+    //   .attr('height', d => 120)
+    //   // .attr('height', d => this.yScale(d[1]) - this.yScale(d[0]))
+    //   .style('fill', (d, i) => this.colors(d.key));
 
     // add new bars
-    update
-      .enter()
-      .append('rect')
-      .attr('class', 'bar')
-      .attr('x', d => this.xScale(d.Class))
-      .attr('y', d => this.yScale(0))
-      .attr('width', this.xScale.bandwidth())
-      .attr('height', 0)
-      .style('fill', (d, i) => this.colors(d.key))
-      .transition()
-      .delay((d, i) => i * 10)
-      .attr('y', d => this.yScale(d[1]))
-      .attr('height', d => 120);
-      // .attr('height', d => this.yScale(d[1]) - this.yScale(d[0]));
+    // update
+    //   .enter()
+    //     .join('g')
+    //   .append('rect')
+    //   .attr('class', 'bar')
+    //   .attr('x', d => this.xScale(d.Class))
+    //   .attr('y', d => this.yScale(0))
+    //   .attr('width', this.xScale.bandwidth())
+    //   .attr('height', 0)
+    //   .style('fill', (d, i) => this.colors(d.key))
+    //   .transition()
+    //   .delay((d, i) => i * 10)
+    //   .attr('y', d => this.yScale(d[1]))
+    //   .attr('height', d => this.yScale(d[1]) - this.yScale(d[0]));
   }
 }
 

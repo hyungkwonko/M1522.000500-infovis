@@ -13,7 +13,7 @@ export class AppComponent {
   title = 'infovisproj';
   public files = file_list;
   public appData = '';
-  public posts: any = [];
+  public receivedData: Array<any> = [];
 
   constructor(private _filelistService: FilelistService) { }
   // constructor() { }
@@ -25,13 +25,11 @@ export class AppComponent {
   }
 
   public updateData($event) {
-    console.log("this is update data");
-    console.log("event: " + $event);
+    console.log('this is update data');
+    console.log('event: ' + $event);
     this.appData = $event;
-    this._filelistService.getMusic(this.appData)
-      .subscribe(data => this.posts = data);
-    console.log("this.appData: " + this.appData);
-    console.log(this.posts);
+    this._filelistService.getMusic($event)
+      .subscribe(data => this.receivedData = data);
   }
 }
 

@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, OnInit, ViewChild, Input, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, ViewEncapsulation, OnInit, ViewChild, Input, ElementRef, AfterViewInit, SimpleChanges } from '@angular/core';
 import * as d3 from 'd3';
 
 // https://bl.ocks.org/LemoNode/5a64865728c6059ed89388b5f83d6b67
@@ -30,7 +30,6 @@ export class DongmoonComponent implements OnInit, AfterViewInit {
         Math.floor(Math.random() * 100)
       ]);
     }
-    console.log(this.data);
   }
 
   ngOnInit() {
