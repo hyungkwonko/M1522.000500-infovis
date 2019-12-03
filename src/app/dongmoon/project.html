@@ -2,7 +2,7 @@
 <!-- saved from url=(0056)file:///C:/projects/MIDI.js/examples/example_source.html -->
 <html class="gr__galactic_ink"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
 	<!-- css -->
-	<!-- <link href="./project_files/MIDIPlayer.css" rel="stylesheet" type="text/css"> -->
+	<link href="./project_files/MIDIPlayer.css" rel="stylesheet" type="text/css">
 	<!-- shims -->
 	<script src="./project_files/Base64.js"></script>
 	<script src="./project_files/Base64binary.js"></script>
@@ -33,10 +33,10 @@
 	<div id="time_bar">
 		<div class="player">
 			<div id="time_controller">
-				<input type="image" src="../../assets/dongmoon_images/play.png" align="absmiddle" value="pause" onclick="pausePlayStop()" id="pausePlayStop">
-				<input type="image" src="../../assets/dongmoon_images/stop.png" align="absmiddle" value="stop" onclick="pausePlayStop(true)">
-				<input type="image" src="../../assets/dongmoon_images/backward.png" align="absmiddle" value="stop" onclick="player.getNextSong(-1);">
-                <input type="image" src="../../assets/dongmoon_images/forward.png" align="absmiddle" value="stop" onclick="player.getNextSong(+1);">
+				<input type="image" src="./project_files/play.png" align="absmiddle" value="pause" onclick="pausePlayStop()" id="pausePlayStop">
+				<input type="image" src="./project_files/stop.png" align="absmiddle" value="stop" onclick="pausePlayStop(true)">
+				<input type="image" src="./project_files/backward.png" align="absmiddle" value="stop" onclick="player.getNextSong(-1);">
+				<input type="image" src="./project_files/forward.png" align="absmiddle" value="stop" onclick="player.getNextSong(+1);">
 			</div>
 			<div class="time-controls" style="float: left; margin: 0; position: relative; top: 5px;">
 				<span id="time1" class="time"></span>
@@ -53,12 +53,12 @@
 		var d = document.getElementById("pausePlayStop");
 		if (stop) {
 			MIDI.player.stop();
-			d.src = "../../assets/dongmoon_images/play.png";
+			d.src = "./images/play.png";
 		} else if (MIDI.player.isPlaying) {
-			d.src = "../../assets/dongmoon_images/play.png";
+			d.src = "./images/play.png";
 			MIDI.player.pause(true);
 		} else {
-			d.src = "../../assets/dongmoon_images/pause.png";
+			d.src = "./images/pause.png";
 			MIDI.player.play();
 		}
 	};
