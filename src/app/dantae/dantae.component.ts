@@ -1,5 +1,6 @@
 import { Component, OnInit, AfterViewInit } from '@angular/core';
 import Vex from 'vexflow/src/index.js'
+import * as d3 from 'd3'
 
 @Component({
   selector: 'app-dantae',
@@ -48,7 +49,11 @@ export class DantaeComponent implements OnInit, AfterViewInit {
       new VF.StaveNote({ keys: ["d/4"], duration: "16" }),
       new VF.StaveNote({ keys: ["d/4"], duration: "16" }),
       new VF.StaveNote({ keys: ["d/4"], duration: "q" }),
-      new VF.StaveNote({ keys: ["d/4"], duration: "q" })
+      new VF.StaveNote({ keys: ["d/4"], duration: "q" }),
+      new VF.StaveNote({ keys: ["d/4"], duration: "q" }),
+      new VF.StaveNote({ keys: ["eb/4"], duration: "q" }),
+      new VF.StaveNote({ keys: ["f/4"], duration: "q" }),
+      new VF.StaveNote({ keys: ["g#/4"], duration: "h" })
     ];
 
     let beams = VF.Beam.generateBeams(notes);
