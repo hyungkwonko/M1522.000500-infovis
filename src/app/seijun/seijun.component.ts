@@ -1,5 +1,9 @@
-import { Component, NgModule } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 
+export interface Food {
+  value: string;
+  viewValue: string;
+}
 @Component({
   selector: 'app-seijun',
   templateUrl: './seijun.component.html',
@@ -11,5 +15,4 @@ export class SeijunComponent {
 
   ngOnInit() {
   }
-
 }

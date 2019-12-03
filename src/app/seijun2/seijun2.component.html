@@ -1,10 +1,10 @@
 <h2>{{ title }}</h2>
 <div class="dm-chart" #svgRef></div>
-<mat-form-field>
+<!-- <mat-form-field>
   <mat-label>Choose music</mat-label>
-  <mat-select>
+  <mat-select ngModel (ngModelChange)="updateChart($event)" [(ngModel)]="zz">
     <mat-option *ngFor="let v of files" [value]="v">
       {{v}}
     </mat-option>
   </mat-select>
-</mat-form-field>
+</mat-form-field> -->
