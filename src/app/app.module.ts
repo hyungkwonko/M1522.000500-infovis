@@ -1,3 +1,4 @@
+import { FilelistService } from './filelist.service';
 import { BrowserModule } from '@angular/platform-browser';
 import { NgModule } from '@angular/core';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
@@ -51,10 +52,6 @@ import { HyungkwonComponent } from './hyungkwon/hyungkwon.component';
 import { SeijunComponent } from './seijun/seijun.component';
 import { DongmoonComponent } from './dongmoon/dongmoon.component';
 import { Seijun2Component } from './seijun2/seijun2.component';
-
-
-import { ChartsModule } from 'ng2-charts';
-import { NgxChartsModule } from '@swimlane/ngx-charts';
 import { DantaeComponent } from './dantae/dantae.component';
 
 @NgModule({
@@ -72,9 +69,6 @@ import { DantaeComponent } from './dantae/dantae.component';
     FormsModule,
     ReactiveFormsModule,
     HttpClientModule,
-
-    ChartsModule,
-    NgxChartsModule,
 
     A11yModule,
     CdkStepperModule,
@@ -119,7 +113,7 @@ import { DantaeComponent } from './dantae/dantae.component';
     PortalModule,
     ScrollingModule,
   ],
-  providers: [],
+  providers: [FilelistService],
   bootstrap: [AppComponent]
 })
 export class AppModule { }

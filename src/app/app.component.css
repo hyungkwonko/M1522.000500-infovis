@@ -120,3 +120,13 @@ mat-grid-tile {
 .hk-footer > div > span {
   text-align: center;
 }
+
+.hk-row {
+  display: flex;
+  margin-right: 8px;
+}
+
+.hk-button-row button,
+.hk-button-row a {
+  margin-right: 8px;
+}

@@ -1,12 +1,7 @@
-import { Component } from '@angular/core';
-
-// import * as d3 from "d3";
-// import { HttpClient } from '@angular/common/http';
-// import * as d3Scale from 'd3-scale';
-// import * as d3Array from 'd3-array';
-// import * as d3Axis from 'd3-axis';
-// import { STATISTICS } from './shared';
-
+import { FilelistService } from './filelist.service';
+import { Component, OnInit, AfterViewInit } from '@angular/core';
+import file_list from '../../Preprocessing/preprocessed/file_list.json';
+import {HttpClient} from '@angular/common/http';
 
 @Component({
   selector: 'app-root',
@@ -14,31 +9,28 @@ import { Component } from '@angular/core';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
+
   title = 'infovisproj';
+  public files = file_list;
+  public appData = '';
+  public receivedData: Array<any> = [];
 
-  changeText:boolean = true;
-  
-  public cluster = [
-    { "name": "K-means", "ID": "D1" },
-    { "name": "DBSCAN", "ID": "D2" }
-  ];
+  constructor(private _filelistService: FilelistService) { }
+  // constructor() { }
 
-  public projection = [
-    { "name": "PCA", "ID": "D1" },
-    { "name": "t-SNE", "ID": "D1" },
-    { "name": "UMAP", "ID": "D2" }
-  ];
+  ngOnInit() {
+  }
 
-  public dta = [
-    { "name": "A data", "ID": "D1" },
-    { "name": "B data", "ID": "D2" },
-    { "name": "C data", "ID": "D2" }
-  ];
+  ngAfterViewInit() {
+  }
 
-  public chosenCluster = this.cluster[0].name;
-  public chosenProjection = this.projection[0].name;
-  public chosenData = this.dta[0].name;
-
+  public updateData($event) {
+    console.log('this is update data');
+    console.log('event: ' + $event);
+    this.appData = $event;
+    this._filelistService.getMusic($event)
+      .subscribe(data => this.receivedData = data);
+  }
 }
 
 // public translate(x: any, y: any) {

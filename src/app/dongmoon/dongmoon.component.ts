@@ -1,4 +1,4 @@
-import { Component, ViewEncapsulation, OnInit, ViewChild, Input, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, ViewEncapsulation, OnInit, ViewChild, Input, ElementRef, AfterViewInit, SimpleChanges } from '@angular/core';
 import * as d3 from 'd3';
 
 // https://bl.ocks.org/LemoNode/5a64865728c6059ed89388b5f83d6b67
@@ -30,7 +30,6 @@ export class DongmoonComponent implements OnInit, AfterViewInit {
         Math.floor(Math.random() * 100)
       ]);
     }
-    console.log(this.data);
   }
 
   ngOnInit() {
@@ -58,7 +57,7 @@ export class DongmoonComponent implements OnInit, AfterViewInit {
     let element: any = this.svgDM.nativeElement;
     this.width = element.offsetWidth - this.margin.left - this.margin.right;
     this.height = element.offsetHeight - this.margin.top - this.margin.bottom;
-    let svg = d3.select(element).append('svg')
+    let svg: any = d3.select(element).append('svg')
       .attr('width', element.offsetWidth)
       .attr('height', element.offsetHeight);
 
