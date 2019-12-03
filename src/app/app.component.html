@@ -4,69 +4,38 @@
   <!-- Tool bar -->
   <mat-toolbar class="hk-toolbar">  
     <mat-toolbar-row>
-      <button type="button" mat-button (click)="drawer.toggle()">☰</button>
       <span>InfoVis term project</span>
     </mat-toolbar-row>
   </mat-toolbar>
 
-  <mat-drawer #drawer class="hk-sidenav" mode="over" opened=false>
-    <!-- Title -->
-    <mat-card-title>Options</mat-card-title>
-  
-    <!-- Data Choose -->
-    <mat-expansion-panel class="hk-expansion">
-      <mat-expansion-panel-header>
-        <mat-panel-title>Data</mat-panel-title>
-        <mat-panel-description>{{chosenData}}</mat-panel-description>
-      </mat-expansion-panel-header>
-      <mat-radio-group
-      aria-labelledby="hk-radio-group-label"
-      class="hk-radio-group"
-      [(ngModel)]="chosenData">
-        <mat-radio-button class="hk-radio-button" *ngFor="let x of dta" [value]="x.name">
-          {{x.name}}
-        </mat-radio-button>
-      </mat-radio-group>
-    </mat-expansion-panel>
-  
-    <!-- Projection Method -->
-    <mat-expansion-panel class="hk-expansion">
-      <mat-expansion-panel-header>
-        <mat-panel-title>Projection</mat-panel-title>
-        <mat-panel-description>{{chosenProjection}}</mat-panel-description>
-      </mat-expansion-panel-header>
-      <mat-radio-group
-      aria-labelledby="hk-radio-group-label"
-      class="hk-radio-group"
-      [(ngModel)]="chosenProjection">
-        <mat-radio-button class="hk-radio-button" *ngFor="let x of projection" [value]="x.name">
-          {{x.name}}
-        </mat-radio-button>
-      </mat-radio-group>
-    </mat-expansion-panel>
-  
-    <!-- Clustering method -->
-    <mat-expansion-panel class="hk-expansion">
-      <mat-expansion-panel-header>
-        <mat-panel-title>Clustering</mat-panel-title>
-        <mat-panel-description>{{chosenCluster}}</mat-panel-description>
-      </mat-expansion-panel-header>
-      <mat-radio-group
-      aria-labelledby="hk-radio-group-label"
-      class="hk-radio-group"
-      [(ngModel)]="chosenCluster">
-        <mat-radio-button class="hk-radio-button" *ngFor="let x of cluster" [value]="x.name">
-          {{x.name}}
-        </mat-radio-button>
-    </mat-radio-group>
-    </mat-expansion-panel>
-  
-    <button mat-raised-button color="primary">Click to change!</button>
-  </mat-drawer>
-  
   <mat-grid-list cols="10" rowHeight="fit" style="height: 100%">
     <mat-grid-tile [colspan] = "3" [rowspan] = "1">
-      <app-hyungkwon></app-hyungkwon>
+    <div class="hk-row">
+      <div>
+        <h3>Choose from list</h3>
+        <mat-form-field>
+          <mat-label>Choose music</mat-label>
+          <mat-select ngModel (ngModelChange)="updateData($event)" [(ngModel)]="appData">
+            <mat-option *ngFor="let file of files" [value]="file">
+              {{file}}
+            </mat-option>
+          </mat-select>
+        </mat-form-field>
+        <p *ngIf="appData; else otherTemplate">Current music: {{ appData }}</p>
+        <ng-template #otherTemplate>
+          <p>Music is not yet specified</p> 
+        </ng-template>
+      </div>
+      <div>
+        <h3>Add new music</h3>
+        <div class="hk-button-row">
+          <button mat-raised-button color="primary">New Music</button>
+          <button mat-raised-button disabled>Disabled</button>
+          <a mat-raised-button color="warn" routerLink=".">Link</a>
+        </div>
+      </div>
+    </div>
+      <!-- <app-hyungkwon></app-hyungkwon> -->
     </mat-grid-tile>
     <mat-grid-tile [colspan] = "7" [rowspan] = "3">
       <app-seijun></app-seijun>
@@ -75,7 +44,7 @@
       <app-dongmoon></app-dongmoon>
     </mat-grid-tile>
     <mat-grid-tile [colspan] = "3" [rowspan] = "3">
-      <app-seijun2></app-seijun2>
+      <app-seijun2 [mold]="receivedData"></app-seijun2>
     </mat-grid-tile>
     <mat-grid-tile [colspan] = "7" [rowspan] = "3">
       <app-dantae></app-dantae>
