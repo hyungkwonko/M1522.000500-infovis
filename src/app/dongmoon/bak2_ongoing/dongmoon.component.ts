@@ -10,7 +10,7 @@ declare var sketch:any;
   templateUrl: './dongmoon.component.html',
   styleUrls: ['./dongmoon.component.css']
 })
-export class DongmoonComponent implements OnInit, AfterViewInit {
+export class DongmoonComponent implements OnInit {
 
   constructor(
     private renderer2: Renderer2,
@@ -85,7 +85,6 @@ export class DongmoonComponent implements OnInit, AfterViewInit {
 
 
   ngOnInit() {
-    console.log (MIDI);
     eventjs.add(window, "load", function(event:any) {
     
       MIDI.loader = new sketch.ui.Timer;
@@ -108,9 +107,6 @@ export class DongmoonComponent implements OnInit, AfterViewInit {
 
   }
   
-  ngAfterViewInit () {
-    console.log (MIDI);
-  }
   
 
 }
