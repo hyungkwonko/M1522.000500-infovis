@@ -197,7 +197,6 @@ def parse_events(f):
     def round_tick(tick):
         tpb = midi.ticks_per_beat
         unit_tick = tpb / 8  # 32nd note
-        return round(round(tick / unit_tick) * unit_tick)
         """
             unit_triplet_tick = tpb / 6     # (8/3)th note
             candidate1 = abs((tick / unit_tick) - round(tick / unit_tick))
@@ -216,7 +215,8 @@ def parse_events(f):
                 return round(round((tick - 4 * unit_triplet_tick) / unit_tick) * unit_tick + 4 * unit_triplet_tick)
             else:
                 return round(round((tick - 8 * unit_triplet_tick) / unit_tick) * unit_tick + 8 * unit_triplet_tick)
-            """
+        """
+        return round(round(tick / unit_tick) * unit_tick)
 
     current_numerator = 4     # default time signature (4/4)
     current_denominator = 4   # default time signature (4/4)
@@ -313,9 +313,31 @@ def parse_events(f):
     notations = notations + key_sigs + set_tempos
     notations.sort(key=lambda e: (e['Tick'], ordering_notations(e)))
 
-
-    def duration_notation(duration_tick, is_rest):
+    def duration_split(duration_tick):
         n = round_tick(duration_tick) * 8 / midi.ticks_per_beat
+        durations = []
+        twos = []
+        for i in [32, 16, 8, 4, 2, 1]:
+            twos.append(round(n // i))
+            n = n % i
+        succession = False
+        for i in range(0, 6):
+            if i == 0:
+                for _ in range(0, twos[0]):
+                    durations.append(32)  # '1'
+                    succession = True
+            elif twos[i] == 1:
+                if succession:
+                    durations[-1] = durations[-1] + pow(2, 5 - i)  # durations[-1] + 'd'
+                else:
+                    durations.append(pow(2, 5 - i))  # str(pow(2, i))
+                    succession = True
+            else:
+                succession = False
+        return durations
+
+    def duration_notation(split_duration, is_rest):
+        n = split_duration
         durations = []
         twos = []
         for i in [32, 16, 8, 4, 2, 1]:
@@ -331,14 +353,18 @@ def parse_events(f):
                 if succession:
                     durations[-1] = durations[-1] + 'd'
                 else:
-                    durations.append(str(pow(2, i)))
+                    durations.append(pow(2, i))
                     succession = True
             else:
                 succession = False
         if is_rest:
             for i in range(0, len(durations)):
                 durations[i] = durations[i] + 'r'
-        return durations
+        if len(durations) == 1:
+            return durations[0]
+        else:
+            print("Duration not split error!")
+            return durations
 
     def duration(note_start, note_end, rest_end):
         tpb = midi.ticks_per_beat
@@ -439,6 +465,7 @@ def parse_events(f):
                                 'Tick': round_tick(notes[old_id]['Start_tick']),
                                 'End_tick': round_tick(notes[old_id]['Start_tick']) + notes[old_id]['Note_duration'],
                                 'IDs': IDs,
+                                'Element_id': str(IDs) + '',  # TODO: tied note id
                                 'Keys': keys,
                                 'Channel': notes[old_id]['Channel'],
                                 'Voice': notes[old_id]['Voice'],
@@ -499,6 +526,7 @@ def parse_events(f):
                         'Tick': round_tick(notes[old_id]['Start_tick']),
                         'End_tick': round_tick(notes[old_id]['Start_tick']) + notes[old_id]['Note_duration'],
                         'IDs': IDs,
+                        'Element_id': str(IDs) + '',  # TODO: tied note id
                         'Keys': keys,
                         'Channel': notes[old_id]['Channel'],
                         'Voice': notes[old_id]['Voice'],
@@ -549,6 +577,11 @@ def parse_events(f):
                     # 지금 그리는 음표 또는 쉼표가 끝나고 나서 다른 기호가 오는 경우
                     if voice_notations[i2]['Type'] == 'rest':
                         # TODO: list of duration -> multiple rests
+                        split_durations = duration_split(voice_notations[i2]['End_tick'] -
+                                                         voice_notations[i2]['Tick'])
+                        new_notations = []
+                        for split_index in range(0, len(split_durations)):
+
                         voice_notations[i2]['Options'] = {
                             'keys': ['b/4'],
                             'duration': duration_notation(voice_notations[i2]['End_tick'] -
