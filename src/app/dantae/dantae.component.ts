@@ -22,6 +22,7 @@ export class DantaeComponent implements OnInit, AfterViewInit {
   createScore() {
     let VF = Vex.Flow;
 
+    /*
     // Create an SVG renderer and attach it to the DIV element named "boo".
     let div = document.getElementById("bbb")
     let renderer = new VF.Renderer(div, VF.Renderer.Backends.SVG);
@@ -30,15 +31,24 @@ export class DantaeComponent implements OnInit, AfterViewInit {
     renderer.resize(500, 200);
     let context = renderer.getContext();
     context.setFont("Arial", 10, "").setBackgroundFillStyle("#eed");
+    */
 
+    let vf = new VF.Factory({
+      renderer: {
+        elementId: 'bbb'
+      }
+    });
+    let ctx = vf.getContext();
     // Create a stave of width 400 at position 10, 40 on the canvas.
-    let stave = new VF.Stave(10, 40, 400);
+    //let stave = new VF.Stave(10, 40, 400);
+    let stave = vf.Stave();
 
     // Add a clef and time signature.
     stave.addClef("treble").addTimeSignature("4/4");
-
+    /*
     // Connect it to the rendering context and draw!
     stave.setContext(context).draw();
+    */
 
     let notes = [
       new VF.StaveNote({ keys: ["e##/5"], duration: "8d" }).
@@ -53,9 +63,11 @@ export class DantaeComponent implements OnInit, AfterViewInit {
       new VF.StaveNote({ keys: ["d/4"], duration: "q" }),
       new VF.StaveNote({ keys: ["eb/4"], duration: "q" }),
       new VF.StaveNote({ keys: ["f/4"], duration: "q" }),
-      new VF.StaveNote({ keys: ["g#/4"], duration: "h" })
+      new VF.StaveNote({ keys: ["g#/4"], duration: "h" }),
+      new VF.BarNote({ type: 'single'})
     ];
 
+    /*
     let beams = VF.Beam.generateBeams(notes);
     VF.Formatter.FormatAndDraw(context, stave, notes);
     beams.forEach(function(b) {b.setContext(context).draw()})
@@ -75,7 +87,13 @@ export class DantaeComponent implements OnInit, AfterViewInit {
       })
     ];
     ties.forEach(function(t) {t.setContext(context).draw()})
-    
+    */
+    let voice = vf.Voice().addTickables(notes);
+    vf.Formatter()
+      .joinVoices([voice])
+      .formatToStave([voice], stave);
+    vf.draw();
+    /*
     let div2 = document.getElementById("aaa");
     let renderer2 = new VF.Renderer(div2, VF.Renderer.Backends.SVG);
     renderer2.resize(500, 200);
