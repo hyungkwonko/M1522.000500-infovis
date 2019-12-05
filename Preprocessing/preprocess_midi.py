@@ -158,6 +158,7 @@ def parse_events(f):
         sequence_position = sequence_position + 1
 
         if event['Type'] == 'note_on':
+            # 'ID'는 임시 아이디이고, 나중에 새로 할당함
             single_note_on.append({
                 'ID': note_id,
                 'Start_tick': event['Tick'],
@@ -192,7 +193,7 @@ def parse_events(f):
         return element["ID"]
     def take_start_tick(element):
         return element["Start_tick"]
-    notes.sort(key=take_start_tick)
+    notes.sort(key=(lambda e: (e["Start_tick"], e['Note_position'])))
 
     def round_tick(tick):
         tpb = midi.ticks_per_beat
@@ -334,10 +335,10 @@ def parse_events(f):
                     succession = True
             else:
                 succession = False
-        return durations
+        return list(map(lambda d: round_tick(d * midi.ticks_per_beat / 8), durations))
 
     def duration_notation(split_duration, is_rest):
-        n = split_duration
+        n = round_tick(split_duration) * 8 / midi.ticks_per_beat
         durations = []
         twos = []
         for i in [32, 16, 8, 4, 2, 1]:
@@ -353,7 +354,7 @@ def parse_events(f):
                 if succession:
                     durations[-1] = durations[-1] + 'd'
                 else:
-                    durations.append(pow(2, i))
+                    durations.append(str(pow(2, i)))
                     succession = True
             else:
                 succession = False
@@ -406,8 +407,8 @@ def parse_events(f):
         return 0, 0
 
     # TODO: 음표나 쉼표의 duration 동안에 notations 중 하나 이상이 끼어들면
-    #       해당 음표나 쉼표를 나눠야 한다. 음표를 나누면 이음줄도 붙여야 한다.
-    #       이음줄로 붙어 있는 대상끼리는 mouseover나 select 시 함께 움직여야 한다.
+    #       해당 음표나 쉼표를 나눠야 한다. 음표를 나누면 붙임줄도 붙여야 한다.
+    #       붙임줄로 붙어 있는 대상끼리는 mouseover나 select 시 함께 움직여야 한다.
 
     voices = []
     note_notations = []
@@ -457,6 +458,7 @@ def parse_events(f):
                         duration(old_start, old_end, new_start)
                     if not notes[old_id]['Note_duration'] == 0:
                         if not notes[old_id]['Is_chord']:
+                            # end of chord
                             IDs.insert(0, notes[old_id]['ID'])
                             keys.insert(0, pitch_class_to_lower(notes[old_id]['Note_pitch_class']) + '/' +
                                         str(notes[old_id]['Note_octave']))
@@ -464,8 +466,8 @@ def parse_events(f):
                                 'Type': 'note',
                                 'Tick': round_tick(notes[old_id]['Start_tick']),
                                 'End_tick': round_tick(notes[old_id]['Start_tick']) + notes[old_id]['Note_duration'],
-                                'IDs': IDs,
-                                'Element_id': str(IDs) + '',  # TODO: tied note id
+                                'IDs': IDs[0],
+                                'Element_id': str(IDs[0]) + '-' + str(round_tick(notes[old_id]['Start_tick'])),
                                 'Keys': keys,
                                 'Channel': notes[old_id]['Channel'],
                                 'Voice': notes[old_id]['Voice'],
@@ -473,12 +475,12 @@ def parse_events(f):
                             })
                             IDs = []
                             keys = []
-                            # TODO: end of tie
                         else:
+                            # 화음인 음표들을 하나로 묶기
+                            # start or middle of chord
                             IDs.insert(0, notes[old_id]['ID'])
                             keys.insert(0, pitch_class_to_lower(notes[old_id]['Note_pitch_class']) + '/' +
                                         str(notes[old_id]['Note_octave']))
-                            # TODO: start or middle of tie
 
                     if not notes[old_id]['Following_rest_duration'] == 0 and not notes[old_id]['Is_chord']:
                         note_notations.append({
@@ -498,7 +500,7 @@ def parse_events(f):
 
     for voice in voices:
         # 어떤 voice에서 처음 등장하는 음표의 시작 위치가 곡의 시작이 아닌 경우 맨 앞에 쉼표 추가
-        if len(voice['Notes']) >= 1 and notes[voice['Notes'][0]['ID']]['Start_tick'] > 0:
+        if len(voice['Notes']) >= 1 and round_tick(notes[voice['Notes'][0]['ID']]['Start_tick']) > 0:
             note_notations.append({
                 'Type': 'rest',
                 'Tick': 0,
@@ -518,6 +520,7 @@ def parse_events(f):
                 duration(voice['Start'], voice['End'], end_of_track)
             if not notes[old_id]['Note_duration'] == 0:
                 if not notes[old_id]['Is_chord']:
+                    # end of chord
                     IDs.insert(0, notes[old_id]['ID'])
                     keys.insert(0, pitch_class_to_lower(notes[old_id]['Note_pitch_class']) + '/' +
                                 str(notes[old_id]['Note_octave']))
@@ -525,8 +528,8 @@ def parse_events(f):
                         'Type': 'note',
                         'Tick': round_tick(notes[old_id]['Start_tick']),
                         'End_tick': round_tick(notes[old_id]['Start_tick']) + notes[old_id]['Note_duration'],
-                        'IDs': IDs,
-                        'Element_id': str(IDs) + '',  # TODO: tied note id
+                        'IDs': IDs[0],
+                        'Element_id': str(IDs[0]) + '-' + str(round_tick(notes[old_id]['Start_tick'])),
                         'Keys': keys,
                         'Channel': notes[old_id]['Channel'],
                         'Voice': notes[old_id]['Voice'],
@@ -534,12 +537,12 @@ def parse_events(f):
                     })
                     IDs = []
                     keys = []
-                    # TODO: end of tie
                 else:
+                    # 화음인 음표들을 하나로 묶기
+                    # start or middle of chord
                     IDs.insert(0, notes[old_id]['ID'])
                     keys.insert(0, pitch_class_to_lower(notes[old_id]['Note_pitch_class']) + '/' +
                                 str(notes[old_id]['Note_octave']))
-                    # TODO: start or middle of tie
 
             if not notes[old_id]['Following_rest_duration'] == 0 and not notes[old_id]['Is_chord']:
                 note_notations.append({
@@ -552,43 +555,115 @@ def parse_events(f):
                 })
             last = last - 1
 
-    score = []
+    # 악보 표기와 붙임줄 구성
+    staves = []     # staves[voice][measure]['Notations'] 안에 해당 성부, 해당 마디의 악보 기호들이 들어 있다.
+    ties = []
+    has_tie = False
+    tie_from_id = ''
+    tie_first_indices = []
+    current_key_signature = 'C'
+
     for i in range(0, len(voices)):
+        # TODO: staves에 현재 voice를 갖고 measure가 0인 새 stave 객체 추가
+        # append new voice and first measure
+        staves.append([{
+            'End_bar': 'end',
+            'Key_signature': current_key_signature,
+            'Notations': []
+        }])
         voice_notations = list(filter(lambda nn: nn['Voice'] == i, note_notations))
         voice_notations.sort(key=lambda nn: nn['Tick'])
-        temp_tick = 0
         i1 = 0
         i2 = 0
-        # append new voice
-        score.append([{
+        staves[i][-1]['Notations'].append({
             'Type': 'clef',
             'Tick': 0,
             'Options': 'treble'
-        }])
+        })
         # this algorithm is similar to merging two sorted lists
         while i1 < len(notations) and i2 < len(voice_notations):
             if notations[i1]['Tick'] <= voice_notations[i2]['Tick']:
-                # 음표나 쉼표가 아닌 기호(마디 구분선, 조표, 박자표 등)를 그릴 것
-                score[i].append(notations[i1])
+                # 음표나 쉼표가 아닌 기호(조표, 박자표 등)를 그릴 것
+                # 마디 구분선을 만나면 구분선은 그리지 않고 새로운 마디를 추가한다.
+                if notations[i1]['Type'] == 'bar':
+                    staves[i][-1]['End_bar'] = notations[i1]['Options']['type']
+                    staves[i].append({
+                        'End_bar': 'end',
+                        'Key_signature': current_key_signature,
+                        'Notations': []
+                    })
+                elif notations[i1]['Type'] == 'key_signature':
+                    current_key_signature = notations[i1]['Options']
+                    staves[i][-1]['Key_signature'] = current_key_signature
+                    staves[i][-1]['Notations'].append(notations[i1])
+                else:
+                    staves[i][-1]['Notations'].append(notations[i1])
                 i1 = i1 + 1
             else:
                 # 음표 또는 쉼표를 그릴 것
                 if notations[i1]['Tick'] >= voice_notations[i2]['End_tick']:
                     # 지금 그리는 음표 또는 쉼표가 끝나고 나서 다른 기호가 오는 경우
                     if voice_notations[i2]['Type'] == 'rest':
-                        # TODO: list of duration -> multiple rests
+                        # 복잡한 박자일 경우 쪼갠다.
+                        # 복잡한 박자란? (2분음표 + 8분음표)처럼 dot으로 표현되지 않아 붙임줄이 필요한 박자
                         split_durations = duration_split(voice_notations[i2]['End_tick'] -
                                                          voice_notations[i2]['Tick'])
                         new_notations = []
-                        for split_index in range(0, len(split_durations)):
-
+                        t = voice_notations[i2]['Tick']
+                        for split_index in range(1, len(split_durations)):
+                            t = t + split_durations[split_index - 1]
+                            new_note2 = copy.deepcopy(voice_notations[i2])
+                            new_note2['Tick'] = round_tick(t)
+                            new_note2['End_tick'] = round_tick(t + split_durations[split_index])
+                            new_note2['Options'] = {
+                                'keys': ['b/4'],
+                                'duration': duration_notation(split_durations[split_index], True)
+                            }
+                            new_notations.append(new_note2)
+                        voice_notations[i2]['End_tick'] = round_tick(voice_notations[i2]['Tick'] + split_durations[0])
                         voice_notations[i2]['Options'] = {
                             'keys': ['b/4'],
                             'duration': duration_notation(voice_notations[i2]['End_tick'] -
-                                                        voice_notations[i2]['Tick'], True)
+                                                          voice_notations[i2]['Tick'], True)
                         }
                     else:
-                        # TODO: list of duration -> multiple notes
+                        # 복잡한 박자일 경우 쪼갠다.
+                        split_durations = duration_split(voice_notations[i2]['End_tick'] -
+                                                         voice_notations[i2]['Tick'])
+                        new_notations = []
+                        t = voice_notations[i2]['Tick']
+                        voice_notations[i2]['Element_id'] = str(voice_notations[i2]['IDs']) + '-' + str(t)
+                        if has_tie:
+                            ties.append({
+                                'from': tie_from_id,
+                                'to': voice_notations[i2]['Element_id'],
+                                'first_indices': tie_first_indices,
+                                'last_indices': list(range(0, len(voice_notations[i2]['Keys'])))
+                            })
+                        tie_from_id = voice_notations[i2]['Element_id']
+                        tie_first_indices = list(range(0, len(voice_notations[i2]['Keys'])))
+                        for split_index in range(1, len(split_durations)):
+                            t = t + split_durations[split_index - 1]
+                            new_note2 = copy.deepcopy(voice_notations[i2])
+                            new_note2['Tick'] = round_tick(t)
+                            new_note2['End_tick'] = round_tick(t + split_durations[split_index])
+                            new_note2['Element_id'] = str(new_note2['IDs']) + '-' + str(t)
+                            new_note2['Options'] = {
+                                'keys': new_note2['Keys'],
+                                'duration': duration_notation(split_durations[split_index], False)
+                            }
+                            new_notations.append(new_note2)
+                            ties.append({
+                                'from': tie_from_id,
+                                'to': new_note2['Element_id'],
+                                'first_indices': tie_first_indices,
+                                'last_indices': list(range(0, len(new_note2['Keys'])))
+                            })
+                            tie_from_id = new_note2['Element_id']
+                            tie_first_indices = list(range(0, len(new_note2['Keys'])))
+                            # new_note2.pop('Keys', None)
+
+                        voice_notations[i2]['End_tick'] = round_tick(voice_notations[i2]['Tick'] + split_durations[0])
                         voice_notations[i2]['Options'] = {
                             'clef': 'treble',
                             'keys': voice_notations[i2]['Keys'],
@@ -596,23 +671,80 @@ def parse_events(f):
                                                           voice_notations[i2]['Tick'], False)
                         }
                         voice_notations[i2].pop('Keys', None)
-                    score[i].append(voice_notations[i2])
+                    staves[i][-1]['Notations'].append(voice_notations[i2])
+                    for notation in new_notations:
+                        notation.pop('Keys', None)
+                    staves[i][-1]['Notations'] = staves[i][-1]['Notations'] + new_notations
                     i2 = i2 + 1
+                    has_tie = False
                 else:
                     # 지금 그리는 음표 또는 쉼표가 끝나기 전에 다른 기호가 끼어드는 경우
                     # 음표 또는 쉼표를 두 개로 쪼개고
-                    # 음표의 경우 쪼개진 것들끼리 이음줄로 이어야 한다.
+                    # 음표의 경우 쪼개진 것들끼리 붙임줄로 이어야 한다.
+                    # 기호 앞의 음표 또는 쉼표를 여기서 처리하고,
+                    # 기호 뒤의 음표 또는 쉼표는 다음 iteration에서 처리하도록 넘긴다.
                     new_note = copy.deepcopy(voice_notations[i2])
                     new_note['End_tick'] = notations[i1]['Tick']
                     if new_note['Type'] == 'rest':
-                        # TODO: list of duration -> multiple rests
+                        # 복잡한 박자일 경우 쪼갠다.
+                        split_durations = duration_split(new_note['End_tick'] -
+                                                         new_note['Tick'])
+                        new_notations = []
+                        t = new_note['Tick']
+                        for split_index in range(1, len(split_durations)):
+                            t = t + split_durations[split_index - 1]
+                            new_note2 = copy.deepcopy(new_note)
+                            new_note2['Tick'] = round_tick(t)
+                            new_note2['End_tick'] = round_tick(t + split_durations[split_index])
+                            new_note2['Options'] = {
+                                'keys': ['b/4'],
+                                'duration': duration_notation(split_durations[split_index], True)
+                            }
+                            new_notations.append(new_note2)
+
+                        new_note['End_tick'] = round_tick(new_note['Tick'] + split_durations[0])
                         new_note['Options'] = {
                             'keys': ['b/4'],
                             'duration': duration_notation(new_note['End_tick'] -
                                                           new_note['Tick'], True)
                         }
                     else:
-                        # TODO: list of duration -> multiple notes
+                        # 복잡한 박자일 경우 쪼갠다.
+                        split_durations = duration_split(new_note['End_tick'] -
+                                                         new_note['Tick'])
+                        new_notations = []
+                        t = new_note['Tick']
+                        new_note['Element_id'] = str(new_note['IDs']) + '-' + str(t)
+                        if has_tie:
+                            ties.append({
+                                'from': tie_from_id,
+                                'to': new_note['Element_id'],
+                                'first_indices': tie_first_indices,
+                                'last_indices': list(range(0, len(new_note['Keys'])))
+                            })
+                        tie_from_id = new_note['Element_id']
+                        tie_first_indices = list(range(0, len(new_note['Keys'])))
+                        for split_index in range(1, len(split_durations)):
+                            t = t + split_durations[split_index - 1]
+                            new_note2 = copy.deepcopy(new_note)
+                            new_note2['Tick'] = round_tick(t)
+                            new_note2['End_tick'] = round_tick(t + split_durations[split_index])
+                            new_note2['Element_id'] = str(new_note2['IDs']) + '-' + str(t)
+                            new_note2['Options'] = {
+                                'keys': new_note2['Keys'],
+                                'duration': duration_notation(split_durations[split_index], True)
+                            }
+                            new_notations.append(new_note2)
+                            ties.append({
+                                'from': tie_from_id,
+                                'to': new_note2['Element_id'],
+                                'first_indices': tie_first_indices,
+                                'last_indices': list(range(0, len(new_note2['Keys'])))
+                            })
+                            tie_from_id = new_note2['Element_id']
+                            tie_first_indices = list(range(0, len(new_note2['Keys'])))
+
+                        new_note['End_tick'] = round_tick(new_note['Tick'] + split_durations[0])
                         new_note['Options'] = {
                             'clef': 'treble',
                             'keys': new_note['Keys'],
@@ -620,21 +752,92 @@ def parse_events(f):
                                                           new_note['Tick'], False)
                         }
                         new_note.pop('Keys', None)
-                    score[i].append(new_note)
+                    staves[i][-1]['Notations'].append(new_note)
+                    for notation in new_notations:
+                        notation.pop('Keys', None)
+                    staves[i][-1]['Notations'] = staves[i][-1]['Notations'] + new_notations
                     voice_notations[i2]['Tick'] = notations[i1]['Tick']
+                    has_tie = True
 
         while i1 < len(notations):
-            score[i].append(notations[i1])
+            # 음표나 쉼표가 아닌 기호(조표, 박자표 등)를 그릴 것
+            # 마디 구분선을 만나면 구분선은 그리지 않고 새로운 마디를 추가한다.
+            if notations[i1]['Type'] == 'bar':
+                staves[i][-1]['End_bar'] = notations[i1]['Options']['type']
+                staves[i].append({
+                    'End_bar': 'end',
+                    'Key_signature': current_key_signature,
+                    'Notations': []
+                })
+            elif notations[i1]['Type'] == 'key_signature':
+                current_key_signature = notations[i1]['Options']
+                staves[i][-1]['Key_signature'] = current_key_signature
+                staves[i][-1]['Notations'].append(notations[i1])
+            else:
+                staves[i][-1]['Notations'].append(notations[i1])
             i1 = i1 + 1
 
         while i2 < len(voice_notations):
             if voice_notations[i2]['Type'] == 'rest':
+                # 복잡한 박자일 경우 쪼갠다.
+                split_durations = duration_split(voice_notations[i2]['End_tick'] -
+                                                 voice_notations[i2]['Tick'])
+                new_notations = []
+                t = voice_notations[i2]['Tick']
+                for split_index in range(1, len(split_durations)):
+                    t = t + split_durations[split_index - 1]
+                    new_note2 = copy.deepcopy(voice_notations[i2])
+                    new_note2['Tick'] = round_tick(t)
+                    new_note2['End_tick'] = round_tick(t + split_durations[split_index])
+                    new_note2['Options'] = {
+                        'keys': ['b/4'],
+                        'duration': duration_notation(split_durations[split_index], True)
+                    }
+                    new_notations.append(new_note2)
+
+                voice_notations[i2]['End_tick'] = round_tick(voice_notations[i2]['Tick'] + split_durations[0])
                 voice_notations[i2]['Options'] = {
                     'keys': ['b/4'],
                     'duration': duration_notation(voice_notations[i2]['End_tick'] -
                                                   voice_notations[i2]['Tick'], True)
                 }
             else:
+                # 복잡한 박자일 경우 쪼갠다.
+                split_durations = duration_split(voice_notations[i2]['End_tick'] -
+                                                 voice_notations[i2]['Tick'])
+                new_notations = []
+                t = voice_notations[i2]['Tick']
+                voice_notations[i2]['Element_id'] = str(voice_notations[i2]['IDs']) + '-' + str(t)
+                if has_tie:
+                    ties.append({
+                        'from': tie_from_id,
+                        'to': voice_notations[i2]['Element_id'],
+                        'first_indices': tie_first_indices,
+                        'last_indices': list(range(0, len(voice_notations[i2]['Keys'])))
+                    })
+                tie_from_id = voice_notations[i2]['Element_id']
+                tie_first_indices = list(range(0, len(voice_notations[i2]['Keys'])))
+                for split_index in range(1, len(split_durations)):
+                    t = t + split_durations[split_index - 1]
+                    new_note2 = copy.deepcopy(voice_notations[i2])
+                    new_note2['Tick'] = round_tick(t)
+                    new_note2['End_tick'] = round_tick(t + split_durations[split_index])
+                    new_note2['Element_id'] = str(new_note2['IDs']) + '-' + str(t)
+                    new_note2['Options'] = {
+                        'keys': new_note2['Keys'],
+                        'duration': duration_notation(split_durations[split_index], True)
+                    }
+                    new_notations.append(new_note2)
+                    ties.append({
+                        'from': tie_from_id,
+                        'to': new_note2['Element_id'],
+                        'first_indices': tie_first_indices,
+                        'last_indices': list(range(0, len(new_note2['Keys'])))
+                    })
+                    tie_from_id = new_note2['Element_id']
+                    tie_first_indices = list(range(0, len(new_note2['Keys'])))
+
+                voice_notations[i2]['End_tick'] = round_tick(voice_notations[i2]['Tick'] + split_durations[0])
                 voice_notations[i2]['Options'] = {
                     'clef': 'treble',
                     'keys': voice_notations[i2]['Keys'],
@@ -642,9 +845,17 @@ def parse_events(f):
                                                   voice_notations[i2]['Tick'], False)
                 }
                 voice_notations[i2].pop('Keys', None)
-            score[i].append(voice_notations[i2])
+            staves[i][-1]['Notations'].append(voice_notations[i2])
+            for notation in new_notations:
+                notation.pop('Keys', None)
+            staves[i][-1]['Notations'] = staves[i][-1]['Notations'] + new_notations
             i2 = i2 + 1
+            has_tie = False
 
+    score = {
+        'Staves': staves,
+        'Ties': ties
+    }
     return events, notes, midi.ticks_per_beat, score
 
 """
