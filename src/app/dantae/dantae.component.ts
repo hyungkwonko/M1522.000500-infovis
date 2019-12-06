@@ -13,6 +13,7 @@ import { MatSliderChange } from '@angular/material/slider';
 export class DantaeComponent implements OnInit, AfterViewInit {
 
   @Input() public data: IMusic;
+  
   @Input() public disabled = true;
   @Input() public max = 100;
   @Input() public min = 0;
@@ -30,7 +31,7 @@ export class DantaeComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     this.spinner = document.getElementById("score-progress-spinner");
     this.spinner.style.display = "none";
-    this.div = document.getElementById("score-view")
+    this.div = document.getElementById("score-view");
   }
 
   ngOnChanges(changes) {
