@@ -1,1 +1,15 @@
-<div id="score_view"></div>
+<div id="score-view">
+    <p>Please choose music first.</p>
+</div>
+<mat-slider
+    id="score-slider"
+    [disabled]="disabled"
+    [min]="min"
+    [max]="max"
+    [value]="value"
+    (input)="onSliderChange($event)">
+</mat-slider>
+<mat-progress-spinner
+    id="score-progress-spinner"
+    color="accent"
+    mode="indeterminate">
