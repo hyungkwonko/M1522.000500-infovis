@@ -1,0 +1,6 @@
+#score_view {
+    width: 900;
+    height: 450;
+    overflow-y: scroll;
+    overflow-x: scroll;
+}
