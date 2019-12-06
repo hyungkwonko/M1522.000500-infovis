@@ -1,6 +1,15 @@
-#score_view {
-    width: 900;
-    height: 450;
-    overflow-y: scroll;
-    overflow-x: scroll;
+#score-view {
+    width: 1050px;
+    height: 420px;
+}
+mat-slider {
+    bottom: 15px;
+    width: 100%;
+}
+mat-progress-spinner {
+    position: absolute;
+    top: 45%;
+    bottom: 45%;
+    left: 45%;
+    right: 45%;
 }
