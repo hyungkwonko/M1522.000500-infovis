@@ -53,6 +53,7 @@ import { SeijunComponent } from './seijun/seijun.component';
 import { DongmoonComponent } from './dongmoon/dongmoon.component';
 import { Seijun2Component } from './seijun2/seijun2.component';
 import { DantaeComponent } from './dantae/dantae.component';
+import { LoadingBarModule, LoadingBarService } from '@ngx-loading-bar/core';
 
 @NgModule({
   declarations: [
@@ -112,6 +113,7 @@ import { DantaeComponent } from './dantae/dantae.component';
     MatTreeModule,
     PortalModule,
     ScrollingModule,
+    LoadingBarModule,
   ],
   providers: [FilelistService],
   bootstrap: [AppComponent]

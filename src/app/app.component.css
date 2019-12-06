@@ -11,7 +11,7 @@
   height: 60px;
   display: flex;
   align-items: center;
-  background-color: #1976d2;
+  background-color: #1ad669;
   color: white;
 }
 
@@ -108,7 +108,9 @@
 
 
 mat-grid-tile {
-  background: lightblue;
+  background: white;
+  border: solid 1px;
+  border-color: grey;
 }
 
 .hk-footer {
