@@ -8,11 +8,6 @@ import * as d3 from 'd3';
 
 import file_list from '../../../Preprocessing/preprocessed/file_list.json';
 import alb_esp1 from '../../../Preprocessing/preprocessed/data/alb_esp1.json';
-import alb_esp2 from '../../../Preprocessing/preprocessed/data/alb_esp2.json';
-import alb_esp3 from '../../../Preprocessing/preprocessed/data/alb_esp3.json';
-import alb_esp4 from '../../../Preprocessing/preprocessed/data/alb_esp4.json';
-import alb_esp5 from '../../../Preprocessing/preprocessed/data/alb_esp5.json';
-
 
 import * as _ from 'lodash';
 
@@ -28,12 +23,14 @@ export class Seijun2Component implements OnInit, AfterViewInit {
   public data: Array<any> = [];
 
   public pitch: Array<any> = [];
+  public pitchCount: any;
+
   public octave: Array<any> = [];
   public title = 'Stacked Bar Chart';
   public keys: Array<any> = [];
   public len: number;
   public files: Array<any> = [];
-
+  
   private margin: any = { top: 20, bottom: 20, left: 20, right: 20};
   private chart: any;
   private width: number;
@@ -43,14 +40,50 @@ export class Seijun2Component implements OnInit, AfterViewInit {
   private colors: any;
   private xAxis: any;
   private yAxis: any;
-
-
+  
+  public sorts: Array<any> = ['default', 'ascending', 'descending'];
+  public opt: string = this.sorts[0];
 
   constructor() { }
 
   public generateList() {
     file_list.forEach(e => {
       this.files.push(e);
+    });
+  }
+
+  public getPitchOrder($event: string) {
+
+    // change setting to the previous one if it is a function (not allocated) 
+    if(typeof($event) != 'function') {
+      this.opt = $event;
+    }
+    
+    let result = [];
+    for (let i = 0; i < this.pitch.length; i++) {
+      result.push([this.pitch[i], this.pitchCount[i]])
+    }
+
+    if (this.opt == 'default') {
+      result.sort(function(a, b) {
+        let aIsAlphabetical = a[0].localeCompare("C") >= 0,
+            bIsAlphabetical = b[0].localeCompare("C") >= 0;
+        if (!aIsAlphabetical && bIsAlphabetical)
+            return 1;
+        if (aIsAlphabetical && !bIsAlphabetical)
+            return -1;
+        return a[0].localeCompare(b[0]);
+      });
+    } else if (this.opt == "ascending") {
+      result.sort((a, b) => a[1] - b[1]);
+    } else {
+      result.sort((a, b) => b[1] - a[1]);
+    };
+    this.pitch = [];
+    this.pitchCount = [];
+    result.forEach(e => {
+      this.pitch.push(e[0])
+      this.pitchCount.push(e[1])
     });
   }
 
@@ -128,18 +161,21 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     this.keys = Object.keys(subsets_a[0]).sort();
     this.len = Object.keys(subsets_a[0]).length;
     let tmp = [];
+    let sum = 0;
+    this.pitchCount = [];
 
     // let sum: number = 0;
     subsets_a.forEach(e => {
       for(let i = 0 ; i < this.len; i++) {
         tmp.push(e[this.keys[i]]);
-        // if(i > 0)
-        //   sum += e[this.keys[i]];
-      }
+        if(i > 0)
+          sum += e[this.keys[i]];
+        }
+      this.pitchCount.push(sum)
       // tmp.push(sum);
       this.data.push(tmp);
       tmp = [];
-      // sum = 0;
+      sum = 0;
       }
     );
 
@@ -150,12 +186,12 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     let stack = d3.stack()
       .keys(this.keys.slice(1));
     this.data = stack(JSON.parse(JSON.stringify(subsets_a)));
-
   }
 
   ngOnInit() {
+    
   }
-
+  
   ngAfterViewInit() {
     this.mold = alb_esp1;
     this.generateList();
@@ -165,7 +201,7 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     if (this.data) {
       this.updateChart();
     }
-}
+  }
 
   ngOnChanges(changes) {
     if (changes.mold.currentValue.Filename) {
@@ -175,9 +211,8 @@ export class Seijun2Component implements OnInit, AfterViewInit {
       if (this.data) {
         this.updateChart();
       }
+      this.sortChart(Event);
     }
-    console.log(this.mold);
-    // this.childFunction()
   }
 
   createChart() {
@@ -196,7 +231,6 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     // define X & Y domains
     let xDomain: any = this.pitch.map(d => d);
     let yDomain: any = [0, d3.max(this.data, d => d3.max(d, d => d[1]))]; // MAX: 142
-    // let yDomain: any = [0, d3.max(this.data, d => d[0])];
 
     // create scales
     this.xScale = d3.scaleBand()
@@ -242,15 +276,18 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     // // update scales & axis
     this.xScale.domain(this.pitch.map(d => d));
     this.yScale.domain([0, d3.max(this.data, d => d3.max(d, d => d[1]))]);
-    console.log(this.data);
     this.colors.domain(this.data.map(d => d.key));
     this.xAxis.transition().call(d3.axisBottom(this.xScale));
     this.yAxis.transition().call(d3.axisLeft(this.yScale));
 
-    // const update = this.chart.selectAll('g');
+    let update = this.chart.selectAll('g')
+      .data(this.data)
+      .join('g')
+      .selectAll('rect')
+      .data(d => d);
 
     // remove exiting bars
-    // update.exit().remove();
+    update.exit().remove();
 
     // update existing bars
     this.chart.selectAll('g')
@@ -260,41 +297,67 @@ export class Seijun2Component implements OnInit, AfterViewInit {
       .selectAll('rect')
       .data(d => d)
       .join('rect')
-        .transition()
-        .attr('x', (d, i) => this.xScale(d.data.Class))
-        .attr('y', d => this.yScale(d[1]))
-        .attr('height', d => this.yScale(d[0]) - this.yScale(d[1]))
-        .attr('width', this.xScale.bandwidth());
+      .transition()
+      .duration(200)
+      .attr('x', (d, i) => this.xScale(d.data.Class))
+      .attr('y', d => this.yScale(d[1]))
+      .attr('height', d => this.yScale(d[0]) - this.yScale(d[1]))
+      .attr('width', this.xScale.bandwidth())
+      .attr("stroke", "grey")
+      
 
     // this.chart.selectAll('g')
     //   .data(this.data)
     //     .join('g')
     //   .selectAll('rect')
     //   .data(d => d)
-    //   .join('rect')
-    //   .transition()
     //   .attr('x', d => this.xScale(d.Class))
     //   .attr('y', d => this.yScale(d[1]))
     //   .attr('width', d => this.xScale.bandwidth())
-    //   .attr('height', d => 120)
-    //   // .attr('height', d => this.yScale(d[1]) - this.yScale(d[0]))
+    //   // .attr('height', d => 120)
+    //   .attr('height', d => this.yScale(d[1]) - this.yScale(d[0]))
     //   .style('fill', (d, i) => this.colors(d.key));
 
-    // add new bars
+    // // add new bars
     // update
     //   .enter()
+    //   .style('fill', (d, i) => this.colors(d.key))
     //     .join('g')
     //   .append('rect')
     //   .attr('class', 'bar')
     //   .attr('x', d => this.xScale(d.Class))
-    //   .attr('y', d => this.yScale(0))
-    //   .attr('width', this.xScale.bandwidth())
-    //   .attr('height', 0)
-    //   .style('fill', (d, i) => this.colors(d.key))
-    //   .transition()
-    //   .delay((d, i) => i * 10)
     //   .attr('y', d => this.yScale(d[1]))
-    //   .attr('height', d => this.yScale(d[1]) - this.yScale(d[0]));
+    //   .attr('width', this.xScale.bandwidth())
+    //   .attr('height', d => this.yScale(d[1]) - this.yScale(d[0]))
+    //   .transition()
+    //   .delay((d, i) => i * 10);
+
+    this.chart.selectAll('g')
+    .data(this.data)
+    .join('g')
+      .attr('fill', d => this.colors(d.key))
+    .selectAll('rect')
+    .data(d => d)
+    .join('rect')
+      .on('mouseover', function (d, i) {
+          d3.select(this)
+          .transition()
+          .duration(30)
+            .attr('stroke', 'red')
+            .attr('stroke-width', "2px")
+      })
+      .on('mouseout', function (d, i) {
+          d3.select(this)
+            .transition()
+            .duration(30)
+            .attr('stroke', 'grey')
+            .attr('stroke-width', "1px")
+      });
+  }
+
+  sortChart(opt) {
+    this.getPitchOrder(opt)
+    this.updateChart();
   }
 }
 
