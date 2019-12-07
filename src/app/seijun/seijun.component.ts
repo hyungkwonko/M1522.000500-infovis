@@ -216,6 +216,26 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     }
   }
 
+  set_hovered(d, i) {
+    d3.select('#bars3_' + i)
+      .style('stroke', 'blue')
+      .style('stroke-width', '2');
+
+    d3.select('#bars4_' + i)
+      .style('stroke', 'red')
+      .style('stroke-width', '2');
+
+  }
+
+  free_hovered(d, i) {
+    d3.select('#bars3_' + i)
+      .style('stroke-width', '0');
+
+    d3.select('#bars4_' + i)
+      .style('stroke-width', '0');
+
+  }
+
   createChart3() {
     let element: any = this.svgRef2.nativeElement;
     this.width = element.offsetWidth - this.margin.left - this.margin.right;
@@ -312,6 +332,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       .enter()
       .append('rect')
       .attr('class', 'bar3')
+      .attr('id', (d,i) => 'bars3_' + i)
       .attr("width", this.barWidth_3 - this.barPadding)
       .attr('x', (d, i) => this.xScale_3(d.Note_velocity))
       .attr('y', d => this.yScale_3(0))
@@ -324,25 +345,9 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     // hover over mouse
     this.chart_3
       .selectAll('.bar3')
-      .on('mouseover', function (d, i) {
-        d3.select(this)
-          .attr('fill', 'red')
-        // .attr('stroke-width', "2px")
-        // console.log("this: ");
-        // console.log(this);
-      })
-      .on('mouseout', function (d, i) {
-        d3.select(this)
-          .attr('fill', 'black')
-        // .attr('stroke-width', "0.2px")
-      })
-      .on('mousedown', function (d, i) {
-        console.log("zlzlzl");
-            const brush = d3
-              .brush()
-              .extent([ [0,0], [400,400] ]);
-        
-      })
+      .on('mouseover', (d, i) => this.set_hovered(d,i))
+      .on('mouseout', (d, i) => this.free_hovered(d,i))
+
   }
 
   updateChart4() {
@@ -359,17 +364,18 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     update4.exit().remove();
 
     this.chart_4.selectAll('.bar4').transition()
-    .attr('x', d => this.xScale_4(d.Note_position))
-    .attr('y', d => this.height - this.height*(d.n_Note_position)/d3.max(this.dataset_n4, d => d.n_Note_position))
-    .attr('width', this.barWidth_4 - this.barPadding)
-    .attr('height', (d, i) => this.height*(d.n_Note_position)/d3.max(this.dataset_n4, d => d.n_Note_position))
-    .style('fill', d => d.color)
+      .attr('x', d => this.xScale_4(d.Note_position))
+      .attr('y', d => this.height - this.height*(d.n_Note_position)/d3.max(this.dataset_n4, d => d.n_Note_position))
+      .attr('width', this.barWidth_4 - this.barPadding)
+      .attr('height', (d, i) => this.height*(d.n_Note_position)/d3.max(this.dataset_n4, d => d.n_Note_position))
+      .style('fill', d => d.color)
 
     // remove existing bars
     update4
       .enter()
       .append('rect')
       .attr('class', 'bar4')
+      .attr('id', (d,i) => 'bars4_' + i)
       .attr('x', d => this.xScale_4(d.Note_position))
       .attr('width', this.barWidth_4 - this.barPadding)
       .style('fill', d => d.color)
@@ -380,14 +386,9 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     // hover over mouse
     this.chart_4
       .selectAll('.bar4')
-      .on('mouseover', function (d, i) {
-        d3.select(this)
-          .style('fill', 'red')
-      })
-      .on('mouseout', function (d, i) {
-        d3.select(this)
-          .style('fill', d.color)
-      })
+      .on('mouseover', (d, i) => this.set_hovered(d,i))
+      .on('mouseout', (d, i) => this.free_hovered(d,i))
+
   }
 
 }
