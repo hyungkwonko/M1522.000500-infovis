@@ -6,7 +6,7 @@ import { Observable } from 'rxjs';
 @Injectable()
 export class FilelistService {
 
-    private _url: string = '/assets/processed/';
+    private _url: string = './assets/processed/';
     private _file: string = 'alb_esp1.json';
     private _url2: string = '';
     constructor(private http: HttpClient) { }
