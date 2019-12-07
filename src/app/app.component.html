@@ -38,7 +38,7 @@
       <!-- <app-hyungkwon></app-hyungkwon> -->
     </mat-grid-tile>
     <mat-grid-tile [colspan] = "7" [rowspan] = "3">
-      <app-seijun></app-seijun>
+      <app-seijun [mold]="receivedData"></app-seijun>
     </mat-grid-tile>
     <mat-grid-tile [colspan] = "3" [rowspan] = "2">
       <app-dongmoon></app-dongmoon>
@@ -47,7 +47,7 @@
       <app-seijun2 [mold]="receivedData"></app-seijun2>
     </mat-grid-tile>
     <mat-grid-tile [colspan] = "7" [rowspan] = "3">
-      <!-- <app-dantae [data]="receivedData"></app-dantae> -->
+      <app-dantae [data]="receivedData"></app-dantae>
     </mat-grid-tile>
   </mat-grid-list>
 

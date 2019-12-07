@@ -21,16 +21,13 @@ export class Seijun2Component implements OnInit, AfterViewInit {
   @ViewChild('svgRef', {static: false}) svgRef: ElementRef;
   @Input() public mold: IMusic;
   public data: Array<any> = [];
-
   public pitch: Array<any> = [];
   public pitchCount: any;
-
   public octave: Array<any> = [];
   public title = 'Stacked Bar Chart';
   public keys: Array<any> = [];
   public len: number;
   public files: Array<any> = [];
-  
   private margin: any = { top: 20, bottom: 20, left: 30, right: 30};
   private chart: any;
   private width: number;
@@ -40,21 +37,19 @@ export class Seijun2Component implements OnInit, AfterViewInit {
   private colors: any;
   private xAxis: any;
   private yAxis: any;
-  
   public sorts: Array<any> = ['default', 'ascending', 'descending'];
   public opt: string = this.sorts[0];
   public start: boolean = true;
 
   constructor() { }
 
-  public generateList() {
-    file_list.forEach(e => {
-      this.files.push(e);
-    });
-  }
+  // public generateList() {
+  //   file_list.forEach(e => {
+  //     this.files.push(e);
+  //   });
+  // }
 
   public getPitchOrder($event: string) {
-
     // change setting to the previous one if it is a function (not allocated) 
     if(typeof($event) != 'function') {
       this.opt = $event;
@@ -194,19 +189,18 @@ export class Seijun2Component implements OnInit, AfterViewInit {
   }
   
   ngAfterViewInit() {
-    this.mold = alb_esp1;
-    this.generateList();
+    // this.mold = alb_esp1;
+    // this.generateList();
     // this.generatePitchOctave();
     // this.generateData();
     // this.createChart();
-    if (this.data) {
-      this.updateChart();
-    }
+    // if (this.data) {
+    //   this.updateChart();
+    // }
   }
 
   ngOnChanges(changes) {
     if (changes.mold.currentValue.Filename) {
-      // console.log('change data from ' + changes.mold.previousValue.Filename + ' to ' + changes.mold.currentValue.Filename);
       this.generatePitchOctave();
       this.generateData();
 
@@ -217,7 +211,6 @@ export class Seijun2Component implements OnInit, AfterViewInit {
       if (this.data) {
         this.updateChart();
       }
-      
       this.sortChart(Event);
     }
   }
@@ -234,7 +227,6 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     this.chart = svg.append('g')
       .attr('class', 'bars')
       .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`);
-      // .attr('class', 'bars')
 
     // define X & Y domains
     let xDomain: any = this.pitch.map(d => d);
@@ -268,19 +260,6 @@ export class Seijun2Component implements OnInit, AfterViewInit {
       .attr('class', 'axis-y')
       .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`)
       .call(d3.axisLeft(this.yScale));
-
-    // this.chart.selectAll('g')
-    //   .data(this.data)
-    //   .join('g')
-    //     .attr('fill', d => this.colors(d.key))
-    //   .selectAll('rect')
-    //   .data(d => d)
-    //   .join('rect')
-    //     .attr('x', (d, i) => this.xScale(d.data.Class))
-    //     .attr('y', d => this.yScale(d[1]))
-    //     .attr('height', d => this.yScale(d[0]) - this.yScale(d[1]))
-    //     .attr('width', this.xScale.bandwidth());
-
   }
 
   updateChart() {
@@ -290,37 +269,13 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     this.colors.domain(this.data.map(d => d.key));
     this.xAxis.transition().call(d3.axisBottom(this.xScale));
     this.yAxis.transition().call(d3.axisLeft(this.yScale));
-
-    // let update = this.chart.selectAll('g')
-    //   .selectAll('.bar')
-    //   .data(this.data);
-
-    // let update2 = update;
-
-    // // remove exiting bars
-    // let update3 = update.exit().remove();
-
-    // console.log(update);
-    // console.log("uopdate2");
-    // console.log(update2);
-    // console.log("update3");
-    // console.log(update3);
-
-    // let update4 = update3.enter().data(this.data).join('g')
     
-    // console.log("update4");
-
-    // console.log(update4);
-
-    // console.log("Chart");
-    // console.log(this.chart);
-    
-    
+    // remove existing data
     let update = this.chart.selectAll('g')
       .data(this.data)
     update.exit().remove();
 
-
+    // update chart
     update.join('g')
       .attr('fill', d => this.colors(d.key))
       .selectAll('rect')
@@ -330,31 +285,12 @@ export class Seijun2Component implements OnInit, AfterViewInit {
       .attr('width', this.xScale.bandwidth())
       .attr('height', d => this.yScale(d[0]) - this.yScale(d[1]))
       .transition()
-      .delay((d, i) => i * 50)
+      .delay((d, i) => i * 30)
         .attr('y', d => this.yScale(d[1]))
         .attr('x', (d, i) => this.xScale(d.data.Class))
         .ease(d3.easeLinear);
-      
-
-    // // update existing bars
-    // this.chart.selectAll('g')
-    //   .data(this.data)
-    //   .join('g')
-    //   .attr('fill', d => this.colors(d.key))
-    //   // .style('opacity', (d,i) => {
-    //   //     return 1 - i * 0.08;
-    //   //   })
-    //   .selectAll('rect')
-    //   .data(d => d)
-    //   .join('rect')
-    //   // .transition()
-    //   // .duration(0)
-    //   .attr('x', (d, i) => this.xScale(d.data.Class))
-    //   .attr('y', d => this.yScale(d[1]))
-    //   .attr('height', d => this.yScale(d[0]) - this.yScale(d[1]))
-    //   .attr('width', this.xScale.bandwidth())
-    //   .attr("stroke", "grey");
-
+    
+    // hover over mouse
     update.join('g')
       .attr('fill', d => this.colors(d.key))
       .selectAll('rect')
@@ -363,12 +299,12 @@ export class Seijun2Component implements OnInit, AfterViewInit {
       .on('mouseover', function (d, i) {
           d3.select(this)
             .attr('stroke', 'red')
-            .attr('stroke-width', "2px")
+            .attr('stroke-width', "2px");
       })
       .on('mouseout', function (d, i) {
           d3.select(this)
             .attr('stroke', 'grey')
-            .attr('stroke-width', "1px")
+            .attr('stroke-width', "1px");
       });
   }
 
