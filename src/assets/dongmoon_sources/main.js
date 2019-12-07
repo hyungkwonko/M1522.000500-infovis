@@ -63,6 +63,17 @@ var pausePlayStop = function(stop) {
       player.loadFile(song[songid], player.start);
     };
     player.setAnimation(function(event, element) {
+
+      // new implementation
+      var selected_music = document.querySelector(".ng-tns-c6-1 .ng-star-inserted span")
+      if (selected_music == null) {
+        console.log ("fuck")
+      }
+      else {
+        console.log (selected_music.innerHTML)
+      }
+
+
       var progress = event.progress;
       var currentTime = event.currentTime >> 0; // where we are now
       var duration = event.duration >> 0; // end of song
@@ -86,4 +97,4 @@ var pausePlayStop = function(stop) {
 
   if (typeof(MIDI) === "undefined") var MIDI = {};
   if (typeof(MIDI.Soundfont) === "undefined") MIDI.Soundfont = {};
-  
+  var now_playing = None;
