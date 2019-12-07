@@ -218,11 +218,6 @@ export class SeijunComponent implements OnInit, AfterViewInit {
   }
 
   ngOnChanges(changes) {
-
-    console.log("This.mold");
-    
-    console.log(this.mold);
-    
     if (this.mold) {
       this.generateData();
       this.createChart();
@@ -234,8 +229,6 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     this.width = element.offsetWidth - this.margin.left - this.margin.right;
     this.height = element.offsetHeight - this.margin.top - this.margin.bottom;
     this.barWidth = this.width / this.dataset_n3.length;
-    console.log("this.width: " + this.width);
-    console.log("this.height: " + this.height);
     
     // let getXscale = function(dataset, width) {
     //   return d3.scaleLinear().domain([d3.min(dataset_n3, d => d.val_x), d3.max(dataset_n3, d => d.val_x)]).range([0, width]);
