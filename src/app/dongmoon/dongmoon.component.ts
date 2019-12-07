@@ -1,7 +1,5 @@
 import { Component, OnInit, NgModule, Renderer2, Inject, AfterViewInit } from '@angular/core';
 import { DOCUMENT } from '@angular/common';
-// import * as midi from '../../assets/dongmoon_sources/full.js';
-import { player, pausePlayStop } from '../../assets/dongmoon_sources/full';
 
 @Component({
   selector: 'app-dongmoon',
