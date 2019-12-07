@@ -31,7 +31,7 @@ export class Seijun2Component implements OnInit, AfterViewInit {
   public len: number;
   public files: Array<any> = [];
   
-  private margin: any = { top: 20, bottom: 20, left: 20, right: 20};
+  private margin: any = { top: 20, bottom: 20, left: 30, right: 30};
   private chart: any;
   private width: number;
   private height: number;
@@ -248,6 +248,9 @@ export class Seijun2Component implements OnInit, AfterViewInit {
       .range(d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), this.data.length).reverse())
       .unknown('#ccc');
 
+    // color = ["#77D977", "#A877D9", "#D9D977", "#77A8D9", "#D97777", "#77D9A8", "#D977D9", "#A8D977", "#7777D9", "#D9A877", "#77D9D9", "#D977A8"];
+    // pitch_domain = ['C', 'C#', 'D', 'D#','E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+
     // x & y axis
     this.xAxis = svg.append('g')
       .attr('class', 'axis-x')
@@ -273,7 +276,7 @@ export class Seijun2Component implements OnInit, AfterViewInit {
   }
 
   updateChart() {
-    // // update scales & axis
+    // update scales & axis
     this.xScale.domain(this.pitch.map(d => d));
     this.yScale.domain([0, d3.max(this.data, d => d3.max(d, d => d[1]))]);
     this.colors.domain(this.data.map(d => d.key));
@@ -293,18 +296,50 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     this.chart.selectAll('g')
       .data(this.data)
       .join('g')
-        .attr('fill', d => this.colors(d.key))
+      .attr('fill', d => this.colors(d.key))
+      // .style('opacity', (d,i) => {
+      //     return 1 - i * 0.08;
+      //   })
       .selectAll('rect')
       .data(d => d)
       .join('rect')
       .transition()
-      .duration(200)
+      .duration(0)
       .attr('x', (d, i) => this.xScale(d.data.Class))
       .attr('y', d => this.yScale(d[1]))
       .attr('height', d => this.yScale(d[0]) - this.yScale(d[1]))
       .attr('width', this.xScale.bandwidth())
-      .attr("stroke", "grey")
+      .attr("stroke", "grey");
+
+    // this.chart.selectAll('g')
+    //   .data(this.data)
+    //   .exit().remove();
+
+    // let newChart = this.chart.selectAll('g')
+    //   .data(this.data)
+    //   .join('g')
+    //     .attr('fill', d => this.colors(d.key))
+    //   .selectAll('rect')
+    //   .data(d => d)
+    //   .join('rect')
+    //   .style('opacity', 0);
+
+    // console.log("update: ");
+    
+    // console.log(update);
+    
       
+    // update.update()
+    //   .transition()
+    //   .duration(200)
+    //   .attr('x', (d, i) => this.xScale(d.data.Class))
+    //   .attr('y', d => this.yScale(d[1]))
+    //   .attr('height', d => this.yScale(d[0]) - this.yScale(d[1]))
+    //   .attr('width', this.xScale.bandwidth())
+    //   .attr("stroke", "grey")
+    
+    // update.enter().transition().delay(100).style('opacity', 1);
+    
 
     // this.chart.selectAll('g')
     //   .data(this.data)
