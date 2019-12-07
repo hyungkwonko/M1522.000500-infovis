@@ -20,9 +20,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
 
   @ViewChild('svgRef2', {static: false}) svgRef2: ElementRef;
   @Input() public mold: IMusic;
-  public data: Object = {};
-  // public datasets: Object = {'dataset_n3' : [], 'dataset_n4' : [], 'dataset_n6' : [], 'dataset_n7' : []};
-  // public return_data: Object = {'return_v' : [0], 'return_p' : [0]};
+  // public data: Object = {};
   public dataset_n3: Array<any> = [];
   public dataset_n4: Array<any> = [];
   public dataset_n6: Array<any> = [];
@@ -52,11 +50,23 @@ export class SeijunComponent implements OnInit, AfterViewInit {
   private height: number ;
   private svgWidth: number = 700;
   private svgHeight: number = 650;
-  private xScale: any;
-  private yScale: any;
+  private xScale_3: any;
+  private yScale_3: any;
+  private xScale_4: any;
+  private yScale_4: any;
+  private xScale_6: any;
+  private yScale_6: any;
+  private xScale_7: any;
+  private yScale_7: any;
   private colors: any;
-  private xAxis: any;
-  private yAxis: any;
+  private xAxis_3: any;
+  private xAxis_4: any;
+  private yAxis_3: any;
+  private yAxis_4: any;
+  private xAxis_6: any;
+  private yAxis_6: any;
+  private xAxis_7: any;
+  private yAxis_7: any;
 
   // Helper Variables
       
@@ -86,7 +96,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     }
     return indexes;
   };
-          
+  
   public RGBtoHSV = function(rgb) {
     let r = rgb.r;
     let g = rgb.g;
@@ -136,8 +146,6 @@ export class SeijunComponent implements OnInit, AfterViewInit {
   }
 
     public generateData() {
-
-      // this.mold = XX.json file 1개 ??
 
       for (let i = 0; i < this.mold.Notes.length; i++) {
         if (this.mold.Notes[i].Note_velocity > 0) {
@@ -201,9 +209,6 @@ export class SeijunComponent implements OnInit, AfterViewInit {
          };
     }
 
-  
-
-
   ngOnInit() {
   }
 
@@ -245,7 +250,9 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     //   return d3.scaleLinear().domain([0, 127]).range([height, 0]);
     //   };
     
-    let svg_3 = d3.select(element)
+    let svg_3 = d3
+    // .select("#barchart_note_velocity")
+    .select(element)
     .append('svg')
     .attr('width', element.offsetWidth)
     .attr('height', element.offsetHeight)
@@ -255,13 +262,14 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     // define X & Y domains
     // create scales
 
-    this.xScale = d3.scaleLinear()
+    this.xScale_3 = d3.scaleLinear()
     .domain([d3.min(this.dataset_n3, d => d.Note_velocity), d3.max(this.dataset_n3, d => d.Note_velocity)])
     .range([0, this.width]);
 
-    this.yScale = d3.scaleLinear()
+    this.yScale_3 = d3.scaleLinear()
     .domain([d3.min(this.dataset_n3, d => d.n_Note_velocity), d3.max(this.dataset_n3, d => d.n_Note_velocity)])
     .range([this.height, 0]);
+
 
     svg_3
     .selectAll('rect')
@@ -275,53 +283,108 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       // console.log("this.height: " + this.height);
       return this.height*(d.n_Note_velocity)/d3.max(this.dataset_n3, d => d.n_Note_velocity)
     })
-    .attr('x', (d, i) => this.xScale(d.Note_velocity))
+    .attr('x', (d, i) => this.xScale_3(d.Note_velocity))
     .attr('y', (d, i) => this.height - this.height*(d.n_Note_velocity)/d3.max(this.dataset_n3, d => d.n_Note_velocity));
 
 
-    this.xAxis = svg_3
+    this.xAxis_3 = svg_3
+    .append('g')
+    // .attr('class', 'xAxis')
+    .attr('transform', `translate(0, ${this.height})`)
+    .call(d3.axisBottom(this.xScale_3));
+
+    this.yAxis_3 = svg_3
+    .append('g')
+    // .attr('class', 'yAxis')
+    .call(d3.axisLeft(this.yScale_3));
+
+
+    let svg_4 = d3
+    // .select("#barchart_note_position")
+    .select(element)
+    .append('svg')
+    .attr('width', element.offsetWidth)
+    .attr('height', element.offsetHeight)
+    .append('g')
+    .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`);
+
+    this.xScale_4 = d3.scaleLinear()
+    .domain([d3.min(this.dataset_n4, d => d.Note_position), d3.max(this.dataset_n4, d => d.Note_position)])
+    .range([0, this.width]);
+
+    this.yScale_4 = d3.scaleLinear()
+    .domain([d3.min(this.dataset_n4, d => d.n_Note_position), d3.max(this.dataset_n4, d => d.n_Note_position)])
+    .range([this.height, 0]);
+
+    svg_4
+    .selectAll('rect')
+    .data(this.dataset_n4)
+    .enter()
+    .append('rect')
+    .attr("width", this.barWidth - this.barPadding)
+    .attr("height", (d, i) => {
+      // console.log("=======this.height*(d.n_Note_velocity)/d3.max(this.dataset_n3, d => d.n_Note_velocity)======");
+      // console.log(this.height*(d.n_Note_velocity)/d3.max(this.dataset_n3, d => d.n_Note_velocity));
+      // console.log("this.height: " + this.height);
+      return this.height*(d.n_Note_position)/d3.max(this.dataset_n4, d => d.n_Note_position)
+    })
+    .attr('x', (d, i) => this.xScale_4(d.Note_position))
+    .attr('y', (d, i) => this.height - this.height*(d.n_Note_position)/d3.max(this.dataset_n4, d => d.n_Note_position));
+
+    this.xAxis_4 = svg_4
+    .append('g')
+    // .attr('class', 'xAxis')
+    .attr('transform', `translate(0, ${this.height})`)
+    .call(d3.axisBottom(this.xScale_4))
+    
+    this.yAxis_4 = svg_4
+    .append('g')
+    // .attr('class', 'yAxis')
+    .call(d3.axisLeft(this.yScale_4));
+    
+    let svg_6 = d3.select(element)
+    .append('svg')
+    .attr('width', element.offsetWidth)
+    .attr('height', element.offsetWidth)
+    .append('g')
+    .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`);
+    
+    this.xScale_6 = svg_6
     .append('g')
     .attr('class', 'xAxis')
     .attr('transform', `translate(0, ${this.height})`)
-    .call(d3.axisBottom(this.xScale));
-
-    this.yAxis = svg_3
+    .call(d3.axisBottom(this.xScale_6))
+    
+    this.yScale_6 = svg_6
     .append('g')
-    .attr('class', 'yAxis')
-    .call(d3.axisLeft(this.yScale));
+    // .attr('class', 'yAxis')
+    .call(d3.axisLeft(this.yScale_6));
 
-    // that.svg_4 = d3.select("#barchart_note_position")
-    // .append('svg')
-    // .attr('width', that.svgWidth)
-    // .attr('height', that.svgHeight)
-    // .append('g')
-    // .attr('transform', that.translate(that.margin.left, that.margin.top));
-    
-    // that.svg_4.xAxis = that.svg_4
-    // .append('g')
-    // .attr('class', 'xAxis')
-    // .attr('transform', that.translate(0, that.height));
-    
-    // that.svg_4.yAxis = that.svg_4
-    // .append('g')
-    // .attr('class', 'yAxis');
-    
-    // that.svg_6 = d3.select("#scatterplot")
-    // .append('svg')
-    // .attr('width', that.svgWidth)
+    svg_6
+    .selectAll('rect')
+    .data(this.dataset_n6)
+    .enter()
+    .append('rect')
+    .attr('class', d => {
+      // console.log(d.class)
+      return '.' + d.class;
+    })
+    .attr('width', d => this.xScale_6(d.Timing_Difference))
+    .attr('height', this.elements_height)
+    .attr('x', d => this.xScale_6(d.val_x))
+    .attr('y', d => this.yScale_6(d.val_y))
+    // .style('fill', d => d.color)
 
-    // .attr('height', that.svgHeight)
-    // .append('g')
-    // .attr('transform', that.translate(that.margin.left, that.margin.top));
-    
-    // that.svg_6.xAxis = that.svg_6
-    // .append('g')
+    this.xAxis_6 = svg_6
+    .append('g')
     // .attr('class', 'xAxis')
-    // .attr('transform', that.translate(0, that.height));
-    
-    // that.svg_6.yAxis = that.svg_6
-    // .append('g')
-    // .attr('class', 'yAxis');
+    .attr('transform', `translate(0, ${this.height})`)
+    .call(d3.axisBottom(this.xScale_6));
+
+    this.yAxis_6 = svg_6
+    .append('g')
+    // .attr('class', 'yAxis')
+    .call(d3.axisLeft(this.yScale_6));
 
     // that.svg_7 = d3.select("#barplot")
     // .append('svg')
