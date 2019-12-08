@@ -35,10 +35,9 @@ export class AppComponent {
     this.appData = $event;
     this._filelistService.getMusic($event)
       .subscribe((data: any) => {
-        this.receivedData = data;
-        // this.receivedNotes = this.receivedData.Notes;
-        this.appendStatus(this.receivedData)
-        // this.appendStatus(this.receivedNotes)
+        let d = data;
+        this.appendStatus(d);
+        this.receivedData = d;
     });
   }
 }
