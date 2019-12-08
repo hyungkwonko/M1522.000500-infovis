@@ -7,9 +7,9 @@
       <span>InfoVis term project</span>
     </mat-toolbar-row>
   </mat-toolbar>
-
-  <mat-grid-list cols="10" rowHeight="fit" style="height: 100%">
-    <mat-grid-tile [colspan] = "3" [rowspan] = "1">
+  
+  <mat-grid-list cols="10" rowHeight="fit" style="height: 93%">
+    <mat-grid-tile [colspan] = "3" [rowspan] = "3">
     <div class="hk-row">
       <div>
         <h3>Choose from list</h3>
@@ -26,39 +26,38 @@
           <p>Music is not yet specified</p> 
         </ng-template>
       </div>
-      <div>
+      <!-- <div>
         <h3>Add new music</h3>
         <div class="hk-button-row">
           <button mat-raised-button color="primary">New Music</button>
           <button mat-raised-button disabled>Disabled</button>
           <a mat-raised-button color="warn" routerLink=".">Link</a>
         </div>
-      </div>
+      </div> -->
     </div>
       <!-- <app-hyungkwon></app-hyungkwon> -->
     </mat-grid-tile>
-    <mat-grid-tile [colspan] = "7" [rowspan] = "3">
-      <app-seijun></app-seijun>
-    </mat-grid-tile>
-    <mat-grid-tile [colspan] = "3" [rowspan] = "2">
-      <app-dongmoon></app-dongmoon>
+    <mat-grid-tile [colspan] = "7" [rowspan] = "6">
+      <app-seijun [mold]="receivedData"></app-seijun>
     </mat-grid-tile>
     <mat-grid-tile [colspan] = "3" [rowspan] = "3">
+      <app-dongmoon></app-dongmoon>
+    </mat-grid-tile>
+    <mat-grid-tile [colspan] = "3" [rowspan] = "6">
       <app-seijun2 [mold]="receivedData"></app-seijun2>
     </mat-grid-tile>
-    <mat-grid-tile [colspan] = "7" [rowspan] = "3">
-      <!--app-dantae></app-dantae-->
-      <app-dantae [data]="receivedData"></app-dantae>
+    <mat-grid-tile [colspan] = "7" [rowspan] = "6">
+      <!-- <app-dantae [data]="receivedData"></app-dantae> -->
     </mat-grid-tile>
   </mat-grid-list>
 
    <!-- footer -->
-   <footer>
+   <!-- <footer>
       <mat-toolbar class="hk-footer">  
         <div>
           <span>footer</span>
         </div>
       </mat-toolbar>
-  </footer>
+  </footer> -->
 
 </mat-drawer-container>

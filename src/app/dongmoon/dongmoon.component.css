@@ -31,7 +31,7 @@ div.player {
 }
 
 #time_controller {
-	margin: 0 auto; width: 160px; float: right;
+	margin: 0 auto; width: 100px; float: right;
 }
 
 div.player #capsule {
@@ -50,7 +50,7 @@ div.player #capsule {
 	border-radius: 5px;
 	-moz-border-radius: 5px;
 	-webkit-border-radius: 5px;
-	width: 420px;
+	width: 300px;
 	display: inline-block;
 	height: 30px;
 }
@@ -83,7 +83,7 @@ div.player span.time {
 }
 
 div.player div.time-controls {
-	width: 560px;
+	width: 280px;
 	margin: 10px auto 0;
 }
 
@@ -198,5 +198,5 @@ h1 {
 }
 
 #time_bar {
-	margin-bottom: 50px; border: 1px solid #000; background: rgba(255,255,255,0.5); border-radius: 11px; float: left; width: 800px; padding-bottom: 15px; position: relative; z-index: 2;	
+	margin-bottom: 50px; border: 1px solid #000; background: rgba(255,255,255,0.5); border-radius: 11px; float: left; width: 440px; padding-bottom: 15px;	
 }

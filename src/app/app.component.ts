@@ -25,8 +25,8 @@ export class AppComponent {
   }
 
   public updateData($event) {
-    console.log('this is update data');
-    console.log('event: ' + $event);
+    // console.log('this is update data');
+    // console.log('event: ' + $event);
     this.appData = $event;
     this._filelistService.getMusic($event)
       .subscribe(data => this.receivedData = data);
