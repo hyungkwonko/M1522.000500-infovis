@@ -493,7 +493,7 @@ def parse_events(f):
                                 'Type': 'note',
                                 'Tick': round_tick(old_note['Start_tick']),
                                 'End_tick': round_tick(old_note['Start_tick']) + old_note['Note_duration'],
-                                'IDs': IDs[0],
+                                'IDs': IDs,
                                 'Element_id': str(IDs[0]) + '-' + str(round_tick(old_note['Start_tick'])),
                                 'Keys': sorted(keys),
                                 'Channel': old_note['Channel'],
@@ -554,7 +554,7 @@ def parse_events(f):
                         'Type': 'note',
                         'Tick': round_tick(old_note['Start_tick']),
                         'End_tick': round_tick(old_note['Start_tick']) + old_note['Note_duration'],
-                        'IDs': IDs[0],
+                        'IDs': IDs,
                         'Element_id': str(IDs[0]) + '-' + str(round_tick(old_note['Start_tick'])),
                         'Keys': sorted(keys),
                         'Channel': old_note['Channel'],
@@ -663,7 +663,7 @@ def parse_events(f):
                                                          voice_notations[i2]['Tick'])
                         new_notations = []
                         t = voice_notations[i2]['Tick']
-                        voice_notations[i2]['Element_id'] = str(voice_notations[i2]['IDs']) + '-' + str(t)
+                        voice_notations[i2]['Element_id'] = str(voice_notations[i2]['IDs'][0]) + '-' + str(t)
                         if has_tie:
                             ties.append({
                                 'from': tie_from_id,
@@ -678,7 +678,7 @@ def parse_events(f):
                             new_note2 = copy.deepcopy(voice_notations[i2])
                             new_note2['Tick'] = round_tick(t)
                             new_note2['End_tick'] = round_tick(t + split_durations[split_index])
-                            new_note2['Element_id'] = str(new_note2['IDs']) + '-' + str(t)
+                            new_note2['Element_id'] = str(new_note2['IDs'][0]) + '-' + str(t)
                             new_note2['Options'] = {
                                 'keys': list(map(note_position_to_string, new_note2['Keys'])),
                                 'duration': duration_notation(split_durations[split_index], False),
@@ -747,7 +747,7 @@ def parse_events(f):
                                                          new_note['Tick'])
                         new_notations = []
                         t = new_note['Tick']
-                        new_note['Element_id'] = str(new_note['IDs']) + '-' + str(t)
+                        new_note['Element_id'] = str(new_note['IDs'][0]) + '-' + str(t)
                         if has_tie:
                             ties.append({
                                 'from': tie_from_id,
@@ -762,7 +762,7 @@ def parse_events(f):
                             new_note2 = copy.deepcopy(new_note)
                             new_note2['Tick'] = round_tick(t)
                             new_note2['End_tick'] = round_tick(t + split_durations[split_index])
-                            new_note2['Element_id'] = str(new_note2['IDs']) + '-' + str(t)
+                            new_note2['Element_id'] = str(new_note2['IDs'][0]) + '-' + str(t)
                             new_note2['Options'] = {
                                 'keys': list(map(note_position_to_string, new_note2['Keys'])),
                                 'duration': duration_notation(split_durations[split_index], True),
@@ -842,7 +842,7 @@ def parse_events(f):
                                                  voice_notations[i2]['Tick'])
                 new_notations = []
                 t = voice_notations[i2]['Tick']
-                voice_notations[i2]['Element_id'] = str(voice_notations[i2]['IDs']) + '-' + str(t)
+                voice_notations[i2]['Element_id'] = str(voice_notations[i2]['IDs'][0]) + '-' + str(t)
                 if has_tie:
                     ties.append({
                         'from': tie_from_id,
@@ -857,7 +857,7 @@ def parse_events(f):
                     new_note2 = copy.deepcopy(voice_notations[i2])
                     new_note2['Tick'] = round_tick(t)
                     new_note2['End_tick'] = round_tick(t + split_durations[split_index])
-                    new_note2['Element_id'] = str(new_note2['IDs']) + '-' + str(t)
+                    new_note2['Element_id'] = str(new_note2['IDs'][0]) + '-' + str(t)
                     new_note2['Options'] = {
                         'keys': list(map(note_position_to_string, new_note2['Keys'])),
                         'duration': duration_notation(split_durations[split_index], True),
