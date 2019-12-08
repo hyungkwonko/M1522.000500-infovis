@@ -278,8 +278,18 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     // update chart
     update.join('g')
       .attr('fill', d => this.colors(d.key))
+      .style('opacity', (d,i) => {
+        return 1 - i * 0.08;
+      })
       .selectAll('rect')
-      .data(d => d)
+      .data((d,i) => {
+        console.log("updatechartd: ===");
+        d.forEach(e => {
+          console.log(e);
+        });
+        // console.log(d[i]);
+        return d;
+      })
       .join('rect')
       .attr("stroke", "grey")
       .attr('width', this.xScale.bandwidth())
