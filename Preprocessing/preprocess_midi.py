@@ -58,7 +58,6 @@ def parse_events(f):
     sequence_position = 0
     note_id = 0
     end_of_track = 0
-    #print(midi.ticks_per_beat)
 
     for msg in merge_tracks(midi.tracks):
         tp = msg.type
@@ -68,7 +67,6 @@ def parse_events(f):
             delta_tick = 0
         tick = tick + delta_tick
         timing = timing + round(delta_tick * current_tempo / midi.ticks_per_beat)
-        # timing = timing + tick2second(delta_tick, midi.ticks_per_beat, current_tempo)
         attributes = []
         channel = None
         note_velocity = None
@@ -186,13 +184,13 @@ def parse_events(f):
                 note['Note_pitch_class'] = pitch_class(event['Note_position'])
                 note['Note_octave'] = (event['Note_position'] // 12) - 1
                 notes.append(note)
-                # print(json.dumps(note, separators=(',', ':')))
             except StopIteration:
                 pass
 
     def round_tick(tick):
         tpb = midi.ticks_per_beat
         unit_tick = tpb / 8  # 32nd note
+        # do not consider triplet
         """
             unit_triplet_tick = tpb / 6     # (8/3)th note
             candidate1 = abs((tick / unit_tick) - round(tick / unit_tick))
@@ -220,6 +218,16 @@ def parse_events(f):
     time_sigs = list(filter(lambda e: e['Type'] == 'time_signature', events))
     time_sigs.sort(key=(lambda e: e['Tick']))
     time_sigs_index = 0
+
+    key_sigs = list(map(lambda e: {
+        'Type': 'key_signature',
+        'Tick': round_tick(e['Tick']),
+        'Options': e['Key']
+    }, list(filter(lambda e: e['Type'] == 'key_signature', events))))
+
+    def find_key_sigs_by_tick(tick):
+        return next((ks for ks in key_sigs if ks['Tick'] == round_tick(tick)), None)
+
     temp_tick = 0
     while temp_tick < end_of_track:
         next_bar_tick = min(end_of_track,
@@ -235,18 +243,32 @@ def parse_events(f):
             break
         elif len(time_sigs) <= time_sigs_index:
             temp_tick = next_bar_tick
-            notations.append({
-              'Type': 'bar',
-              'Tick': temp_tick,
-              'Options': {'type': 'single'}
-            })
+            if find_key_sigs_by_tick(temp_tick) is None:
+                notations.append({
+                  'Type': 'bar',
+                  'Tick': temp_tick,
+                  'Options': {'type': 'single'}
+                })
+            else:
+                notations.append({
+                  'Type': 'bar',
+                  'Tick': temp_tick,
+                  'Options': {'type': 'double'}
+                })
         elif next_bar_tick < round_tick(time_sigs[time_sigs_index]['Tick']):
             temp_tick = next_bar_tick
-            notations.append({
-              'Type': 'bar',
-              'Tick': temp_tick,
-              'Options': {'type': 'single'}
-            })
+            if find_key_sigs_by_tick(temp_tick) is None:
+                notations.append({
+                  'Type': 'bar',
+                  'Tick': temp_tick,
+                  'Options': {'type': 'single'}
+                })
+            else:
+                notations.append({
+                  'Type': 'bar',
+                  'Tick': temp_tick,
+                  'Options': {'type': 'double'}
+                })
         elif next_bar_tick == round_tick(time_sigs[time_sigs_index]['Tick']):
             temp_tick = next_bar_tick
             notations.append({
@@ -296,11 +318,6 @@ def parse_events(f):
         }
         return order[notation['Type']]
 
-    key_sigs = list(map(lambda e: {
-        'Type': 'key_signature',
-        'Tick': round_tick(e['Tick']),
-        'Options': e['Key']
-    }, list(filter(lambda e: e['Type'] == 'key_signature', events))))
     """
     set_tempos = list(map(lambda e: {
         'Type': 'set_tempo',
@@ -403,9 +420,9 @@ def parse_events(f):
         print("Duration error!")
         return 0, 0
 
-    # TODO: 음표나 쉼표의 duration 동안에 notations 중 하나 이상이 끼어들면
-    #       해당 음표나 쉼표를 나눠야 한다. 음표를 나누면 붙임줄도 붙여야 한다.
-    #       붙임줄로 붙어 있는 대상끼리는 mouseover나 select 시 함께 움직여야 한다.
+    # 음표나 쉼표의 duration 동안에 notations 중 하나 이상이 끼어들면
+    # 해당 음표나 쉼표를 나눠야 한다. 음표를 나누면 붙임줄도 붙여야 한다.
+    # 붙임줄로 붙어 있는 대상끼리는 mouseover나 onclick 시 함께 움직여야 한다.
 
     notes.sort(key=(lambda e: e["Start_tick"]))
     sorted_notes = sorted(notes, key=(lambda e: (e["Start_tick"], e['Note_position'])))
@@ -476,7 +493,7 @@ def parse_events(f):
                                 'Type': 'note',
                                 'Tick': round_tick(old_note['Start_tick']),
                                 'End_tick': round_tick(old_note['Start_tick']) + old_note['Note_duration'],
-                                'IDs': IDs[0],
+                                'IDs': sorted(IDs),
                                 'Element_id': str(IDs[0]) + '-' + str(round_tick(old_note['Start_tick'])),
                                 'Keys': sorted(keys),
                                 'Channel': old_note['Channel'],
@@ -537,7 +554,7 @@ def parse_events(f):
                         'Type': 'note',
                         'Tick': round_tick(old_note['Start_tick']),
                         'End_tick': round_tick(old_note['Start_tick']) + old_note['Note_duration'],
-                        'IDs': IDs[0],
+                        'IDs': sorted(IDs),
                         'Element_id': str(IDs[0]) + '-' + str(round_tick(old_note['Start_tick'])),
                         'Keys': sorted(keys),
                         'Channel': old_note['Channel'],
@@ -578,7 +595,7 @@ def parse_events(f):
             return 1
 
     for i in range(0, len(voices)):
-        # TODO: staves에 현재 voice를 갖고 measure가 0인 새 stave 객체 추가
+        # staves에 현재 voice를 갖고 measure가 0인 새 stave 객체 추가
         # append new voice and first measure
         staves.append([{
             'End_bar': 'end',
@@ -646,7 +663,7 @@ def parse_events(f):
                                                          voice_notations[i2]['Tick'])
                         new_notations = []
                         t = voice_notations[i2]['Tick']
-                        voice_notations[i2]['Element_id'] = str(voice_notations[i2]['IDs']) + '-' + str(t)
+                        voice_notations[i2]['Element_id'] = str(voice_notations[i2]['IDs'][0]) + '-' + str(t)
                         if has_tie:
                             ties.append({
                                 'from': tie_from_id,
@@ -661,7 +678,7 @@ def parse_events(f):
                             new_note2 = copy.deepcopy(voice_notations[i2])
                             new_note2['Tick'] = round_tick(t)
                             new_note2['End_tick'] = round_tick(t + split_durations[split_index])
-                            new_note2['Element_id'] = str(new_note2['IDs']) + '-' + str(t)
+                            new_note2['Element_id'] = str(new_note2['IDs'][0]) + '-' + str(t)
                             new_note2['Options'] = {
                                 'keys': list(map(note_position_to_string, new_note2['Keys'])),
                                 'duration': duration_notation(split_durations[split_index], False),
@@ -730,7 +747,7 @@ def parse_events(f):
                                                          new_note['Tick'])
                         new_notations = []
                         t = new_note['Tick']
-                        new_note['Element_id'] = str(new_note['IDs']) + '-' + str(t)
+                        new_note['Element_id'] = str(new_note['IDs'][0]) + '-' + str(t)
                         if has_tie:
                             ties.append({
                                 'from': tie_from_id,
@@ -745,7 +762,7 @@ def parse_events(f):
                             new_note2 = copy.deepcopy(new_note)
                             new_note2['Tick'] = round_tick(t)
                             new_note2['End_tick'] = round_tick(t + split_durations[split_index])
-                            new_note2['Element_id'] = str(new_note2['IDs']) + '-' + str(t)
+                            new_note2['Element_id'] = str(new_note2['IDs'][0]) + '-' + str(t)
                             new_note2['Options'] = {
                                 'keys': list(map(note_position_to_string, new_note2['Keys'])),
                                 'duration': duration_notation(split_durations[split_index], True),
@@ -825,7 +842,7 @@ def parse_events(f):
                                                  voice_notations[i2]['Tick'])
                 new_notations = []
                 t = voice_notations[i2]['Tick']
-                voice_notations[i2]['Element_id'] = str(voice_notations[i2]['IDs']) + '-' + str(t)
+                voice_notations[i2]['Element_id'] = str(voice_notations[i2]['IDs'][0]) + '-' + str(t)
                 if has_tie:
                     ties.append({
                         'from': tie_from_id,
@@ -840,7 +857,7 @@ def parse_events(f):
                     new_note2 = copy.deepcopy(voice_notations[i2])
                     new_note2['Tick'] = round_tick(t)
                     new_note2['End_tick'] = round_tick(t + split_durations[split_index])
-                    new_note2['Element_id'] = str(new_note2['IDs']) + '-' + str(t)
+                    new_note2['Element_id'] = str(new_note2['IDs'][0]) + '-' + str(t)
                     new_note2['Options'] = {
                         'keys': list(map(note_position_to_string, new_note2['Keys'])),
                         'duration': duration_notation(split_durations[split_index], True),
@@ -878,85 +895,8 @@ def parse_events(f):
     }
     return events, notes, midi.ticks_per_beat, score
 
-"""
-def event2vec(event):
-    '''Transform a single event into a vector of length 4'''
-    return np.array((event['Type'], event['Is_meta'], event['Delta_tick'], event['Tick'],
-                     event['Timing'], event['Current_tempo'], event['Sequence_position'],
-                     event['Channel'], event['Note_position'],
-                     event['Note_velocity'], event['Tempo'], event['Numerator'],
-                     event['Denominator'], event['Clocks_per_click'],
-                     event['Notated_32nd_notes_per_beat'], event['Key'],
-                     event['Control'], event['Value'], event['Program']),
-                    dtype=('U30, bool, u4, u4, ' +
-                           'u8, u4, u4, ' +
-                           'u1, u1, ' +
-                           'u1, u4, u4, ' +
-                           'u1, u1, ' +
-                           'u1, U4, ' +
-                           'u1, u1, u1'))
-
-def translate_file(in_path):
-    '''Read midi file from in_path and return a vector representation'''
-    events, notes, ticks_per_beat = parse_events(in_path)
-    vecs = np.array([event2vec(e) for e in events])
-    return vecs
-"""
-
 GO_UP = "\033[F"
 
-"""
-def translate_dir_csv(in_dir, out_file):
-    '''Read all midi files in in_dir and create corresponding a single csv file'''
-    if exists(out_file):
-        skip_header = True
-    else:
-        skip_header = False
-    f = open(out_file, 'a+')
-    w = csv.writer(f, quoting=csv.QUOTE_NONNUMERIC)
-    mid_files = listdir(in_dir)
-    n = len(mid_files)
-    mid_files.sort()
-    flush_rate = max((n//20, 15))
-    if not skip_header:
-        w.writerow(['Filename',
-            'Type',
-            'Is_meta',
-            'Delta_tick',
-            'Tick',
-            'Timing',
-            'Current_tempo',
-            'Sequence_position',
-            'Channel',
-            'Note_position',
-            'Note_velocity',
-            'Tempo',
-            'Numerator',
-            'Denominator',
-            'Clocks_per_click',
-            'Notated_32nd_notes_per_beat',
-            'Key',
-            'Control',
-            'Value',
-            'Program'])
-    print() # allocate a line to write over and over
-    for i, in_path in enumerate(mid_files):
-        print(GO_UP+'Processing file {} of {}: {}'.format(i, n, in_path))
-        if not (in_dir[-1] == '\\' or in_dir[-1] == '/'):
-            in_dir = in_dir + '/'
-        try:
-            vecs = translate_file(in_dir.replace('\\', '/')+in_path)
-        except IOError as e:
-            print(e)
-            continue
-        l = vecs.tolist()
-        fname = in_path.rstrip('.mid').rstrip('.MID').rstrip('.midi').rstrip('.MIDI')
-        desc = (list([fname]) for x in range(len(l)))
-        w.writerows(map(lambda x: tuple(x[0])+tuple(x[1]), zip(desc, l)))
-        if i % flush_rate == 0:
-            f.flush()
-    f.close()
-"""
 
 def translate_dir_json(in_dir, out_file_list):
     if exists(out_file_list):
@@ -990,11 +930,6 @@ def translate_dir_json(in_dir, out_file_list):
             'Notes': notes,
             'Score': score
         }
-        """
-        'Voices': list(map(lambda e: e['Channel'], voices)),
-        'Notations': notations,
-        'Note_notations': note_notations
-        """
         file_list.append(fname)
         f = open(fname + '.json', 'w')
         f.write(json.dumps(data, separators=(',', ':')))
