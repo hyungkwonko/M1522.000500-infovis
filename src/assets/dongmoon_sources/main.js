@@ -64,13 +64,13 @@ var MIDIPlayerPercentage = function() {
   // var time2 = document.getElementById("time2");
   var capsule = document.getElementById("capsule");
   var timeCursor = document.getElementById("cursor");
+  var d = document.getElementById("pausePlayStop");
   //
   eventjs.add(capsule, "drag", function(event, self) {
     eventjs.cancel(event);
     MIDI.player.currentTime = (self.x) / 280 * MIDI.player.duration;
     if (MIDI.player.currentTime < 0) MIDI.player.currentTime = 0;
     if (MIDI.player.currentTime > MIDI.player.duration) MIDI.player.currentTime = MIDI.player.duration;
-    var d = document.getElementById("pausePlayStop");
     if (self.state === "down") {
       MIDI.player.pause(true);
       is_stop = 1;
@@ -99,7 +99,6 @@ var MIDIPlayerPercentage = function() {
     }
     var selected_music = document.querySelector(".ng-tns-c6-1 .ng-star-inserted span");
     if (now_playing != selected_music.innerHTML) {
-      var d = document.getElementById("pausePlayStop");
       d.src = "../../assets/dongmoon_images/play.png";
       MIDI.player.stop ()
       is_stop = 1;
@@ -137,16 +136,16 @@ var MIDIPlayerPercentage = function() {
     var status_bar1 = document.getElementById("bars6_0");
     status_bar1.style.color = "#EB7A7A"
     status_bar1.style.fill = "#EB7A7A"
-    status_bar1.style.width = 973.11 * progress + 'px';
-    status_bar1.style.height = 150;
-    // status_bar1.x = 100000 * progress;
-    // status_bar1.x = 300;
+    status_bar1.style.width = 3 + 'px';
+    status_bar1.style.position = 'relative'
+    status_bar1.style.marginLeft = 973.11 * progress + 'px';
+    status_bar1.style.height = 200;
 
     var status_bar2 = document.getElementById("bars7_0");
     status_bar2.style.color = "#EB7A7A"
     status_bar2.style.fill = "#EB7A7A"
     status_bar2.style.width = 973.11 * progress + 'px';
-    status_bar2.style.height = 150;
+    status_bar2.style.height = 100;
   });
 };
     
