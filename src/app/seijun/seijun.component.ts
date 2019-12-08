@@ -272,10 +272,6 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     d3.select('#bars7_' + i)
       .style('stroke', 'black')
       .style('stroke-width', '2');
-
-    d.State.hovered = true;
-    // console.log(d);
-    // console.log(d.State);
   }
 
   free_hovered(d, i) {
@@ -292,10 +288,6 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     d3.select('#bars7_' + i)
       .style('stroke', 'black')
       .style('stroke-width', '0');
-    
-    d.State.hovered = false;
-    // console.log(d);
-    // console.log(d.State);
   }
 
   chart_hovered_6(d) {
