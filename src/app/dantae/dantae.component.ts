@@ -37,7 +37,9 @@ export class DantaeComponent implements OnInit, AfterViewInit {
   }
 
   ngOnChanges(changes) {
-    if (changes.hasOwnProperty('data') && changes.data.currentValue.Filename) {
+    if (typeof changes !== "undefined" && 'data' in changes &&
+      typeof changes.data.currentValue !== "undefined" &&
+      'Filename' in changes.data.currentValue && changes.data.currentValue.Filename) {
       this.beforeRendering();
       setTimeout(this.createScore, 1, this);
     }
@@ -57,6 +59,9 @@ export class DantaeComponent implements OnInit, AfterViewInit {
   afterRendering(obj) {
     console.log("score rendering complete");
     obj.value = 0;
+    if (typeof obj.group !== "undefined") {
+      obj.group.style.transform = "translate(-0px, 0)";
+    }
     obj.disabled = false;
     obj.spinner.style.display = "none";
     obj.hasRendered = true;
@@ -89,7 +94,6 @@ export class DantaeComponent implements OnInit, AfterViewInit {
     let height = 0;
     let voices = [];
     let formatter = new VF.Formatter();
-    console.log(obj.data)
     let measureCount = obj.data.Score.Staves[0].length;
   
     obj.data.Score.Staves.forEach(voiceData => {
@@ -155,7 +159,7 @@ export class DantaeComponent implements OnInit, AfterViewInit {
         VF.Accidental.applyAccidentals([voice], measure.Key_signature);
         voice.setStrict(false).addTickables(notes).setStave(stave);
   
-        formatter.joinVoices([voice]).format([voice]);
+        formatter.joinVoices([voice]).formatToStave([voice], stave);
         voiceInMeasures.push([voice, stave, x]);
         height = Math.max(voice.getBoundingBox().getH() * 1.3, height);
   
@@ -198,7 +202,7 @@ export class DantaeComponent implements OnInit, AfterViewInit {
   
       let startX = Math.max(...s.map(getNoteStartX));
       s.forEach(stave => stave[0].setNoteStartX(startX));
-      
+
       formatter.format(f, width - (startX - s[0][1]));
       voices.forEach(v => v[i][0].setContext(ctx).draw());
     }
@@ -240,15 +244,16 @@ export class DantaeComponent implements OnInit, AfterViewInit {
         notehead = noteheadG[index].firstChild;
       }
       else {
-        console.log(noteID.toString() + " does not exist!");
+        //console.log(noteID.toString() + " does not exist!");
         return;
       }
 
-      /*
       let enter = d3.select(notehead)
                     .data([noteData], function(d) { return noteID.toString() })
-                    .enter();
-      */
+                    .enter()
+                    .on('mouseenter', d => {d3.select(notehead).attr('fill', 'red')})//d => d.State.hovered = true)
+                    .on('mouseout', d => {d3.select(notehead).attr('fill', 'blue')})//d => d.State.hovered = false)
+
       let update = d3.select(notehead)
                      .data([noteData], function(d) { return noteID.toString() })
                      .attr('fill', d => /*color(d.state)*/'blue')  // 색 함수(state => colorString)에 넣어서 처리
@@ -279,7 +284,7 @@ export class DantaeComponent implements OnInit, AfterViewInit {
   }
 
   onSliderChange(event: MatSliderChange) {
-    if (event.value >= 0) {
+    if (event.value >= 0 && typeof this.group !== "undefined") {
       this.group.style.transform = "translate(-" + event.value + "px, 0)";
     }
   }
