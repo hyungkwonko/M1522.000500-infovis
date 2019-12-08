@@ -212,6 +212,7 @@ export class Seijun2Component implements OnInit, AfterViewInit {
         this.updateChart();
       }
       this.sortChart(Event);
+      document.getElementById("found-key").innerHTML = '(Key may be <span style="color:#1ad669">' + this.findKeyFromDistribution() + '</span>)';
     }
   }
 
@@ -311,6 +312,99 @@ export class Seijun2Component implements OnInit, AfterViewInit {
   sortChart(opt) {
     this.getPitchOrder(opt)
     this.updateChart();
+  }
+
+  findKeyFromDistribution() {
+    // http://rnhart.net/articles/key-finding/
+    let notes = this.mold.Notes;
+    let pitchClassDistribution = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];  // pitchClassDistribution[0] is C.
+    notes.forEach(element => {
+      pitchClassDistribution[element.Note_position % 12] += element.End_timing - element.Start_timing;
+    });
+
+    let majorProfile = [
+      [6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88], // C major
+      [2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29], // C# major
+      [2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66], // D major
+      [3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39], // D# major
+      [2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19], // E major
+      [5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09, 2.52], // F major
+      [2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38, 4.09], // F# major
+      [4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33, 4.38], // G major
+      [4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48, 2.33], // G# major
+      [2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23, 3.48], // A major
+      [3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35, 2.23], // A# major
+      [2.23, 3.48, 2.33, 4.38, 4.09, 2.52, 5.19, 2.39, 3.66, 2.29, 2.88, 6.35], // B major
+    ];
+    let minorProfile = [
+      [6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17], // C minor
+      [3.17, 6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34], // C# minor
+      [3.34, 3.17, 6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69], // D minor
+      [2.69, 3.34, 3.17, 6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98], // D# minor
+      [3.98, 2.69, 3.34, 3.17, 6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75], // E minor
+      [4.75, 3.98, 2.69, 3.34, 3.17, 6.33, 2.68, 3.52, 5.38, 2.60, 3.53, 2.54], // F minor
+      [2.54, 4.75, 3.98, 2.69, 3.34, 3.17, 6.33, 2.68, 3.52, 5.38, 2.60, 3.53], // F# minor
+      [3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17, 6.33, 2.68, 3.52, 5.38, 2.60], // G minor
+      [2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17, 6.33, 2.68, 3.52, 5.38], // G# minor
+      [5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17, 6.33, 2.68, 3.52], // A minor
+      [3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17, 6.33, 2.68], // A# minor
+      [2.68, 3.52, 5.38, 2.60, 3.53, 2.54, 4.75, 3.98, 2.69, 3.34, 3.17, 6.33], // B minor
+    ];
+
+    // https://stackoverflow.com/questions/15886527/javascript-library-for-pearson-and-or-spearman-correlations
+    const pcorr = (x: number[], y: number[]) => {
+      let sumX = 0,
+        sumY = 0,
+        sumXY = 0,
+        sumX2 = 0,
+        sumY2 = 0;
+      const minLength = x.length = y.length = Math.min(x.length, y.length),
+        reduce = (xi, idx) => {
+          const yi = y[idx];
+          sumX += xi;
+          sumY += yi;
+          sumXY += xi * yi;
+          sumX2 += xi * xi;
+          sumY2 += yi * yi;
+        }
+      x.forEach(reduce);
+      return (minLength * sumXY - sumX * sumY) / Math.sqrt((minLength * sumX2 - sumX * sumX) * (minLength * sumY2 - sumY * sumY));
+    };
+
+    const pitchName = (pitch: number) => {
+      let switcher = {
+        0: 'C',
+        1: 'C#',
+        2: 'D',
+        3: 'D#',
+        4: 'E',
+        5: 'F',
+        6: 'F#',
+        7: 'G',
+        8: 'G#',
+        9: 'A',
+        10: 'A#',
+        11: 'B'
+      };
+      return switcher[pitch.toString()];
+    }
+
+    let result = '';
+    let maxCorr = -1;
+    for (let i = 0; i < 12; i++) {
+      let majorCorr = pcorr(majorProfile[i], pitchClassDistribution);
+      if (maxCorr < majorCorr) {
+        result = pitchName(i) + ' major';
+        maxCorr = majorCorr;
+      }
+      let minorCorr = pcorr(minorProfile[i], pitchClassDistribution);
+      if (maxCorr < minorCorr) {
+        result = pitchName(i) + ' minor';
+        maxCorr = minorCorr;
+      }
+    }
+    console.log(maxCorr);
+    return result;
   }
 }
 
