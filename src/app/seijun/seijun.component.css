@@ -1,15 +1,20 @@
-.sj-chart3, 
+.sj-chart3 {
+  width: 200px;
+  height: 200px;
+}
+
 .sj-chart4 {
   width: 200px;
   height: 200px;
 }
+
 .sj-chart6 {
   width: 1000px;
-  height: 200px;
+  height: 250px;
 }
 .sj-chart7 {
   width: 1000px;
-  height: 200px;
+  height: 150px;
 }
 
 #sj-chart {
@@ -20,6 +25,8 @@
 }
 
 .sj-chart1 > h4,
-.sj-chart2 > h4 {
+.sj-chart2 > h4,
+.sj-chart1 > h5,
+.sj-chart2 > h5 {
   margin: 20px 10px -20px 10px;
 }

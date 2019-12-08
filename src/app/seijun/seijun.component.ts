@@ -1,9 +1,6 @@
 import { IMusic } from './../music';
-import { Component, OnInit, ViewChild, Input, ElementRef, AfterViewInit} from '@angular/core';
+import { Component, OnInit, ViewChild, Input, ElementRef, AfterViewInit, SimpleChanges} from '@angular/core';
 import * as d3 from 'd3';
-
-import file_list from '../../../Preprocessing/preprocessed/file_list.json';
-import alb_esp1 from '../../../Preprocessing/preprocessed/data/alb_esp1.json';
 
 import * as _ from 'lodash';
 
@@ -143,7 +140,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     this.dataset_n6 = [];
     this.dataset_n7 = [];
 
-    for (let i = 0; i < this.mold.Notes.length; i++) {
+    for (let i = 0; i < this.mold.Notes.length; i++) { // this.mold.Notes.length
       if (this.mold.Notes[i].Note_velocity > 0) {
           this.note_on_off_pair.push(
           {
@@ -180,12 +177,6 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       );
     };
 
-    console.log("this.returndatasetV");
-    console.log(this.return_data_v);
-    console.log("this.returndatasetp");
-    console.log(this.return_data_p);
-    
-
     for (let i = 0; i < this.mold.Notes.length; i++) {
       if (this.mold.Notes[i].Note_velocity > 0) {
         this.dataset_n6.push(
@@ -219,8 +210,8 @@ export class SeijunComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
   }
 
-  ngOnChanges(changes) {
-    if (changes.mold.currentValue.Filename) {
+  ngOnChanges(changes: SimpleChanges) {
+    if (!changes.mold.isFirstChange()) {
       this.generateData();
       if(this.start_n3) {
         this.createChart3();
@@ -229,7 +220,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
         this.createChart7();
         this.start_n3 = false;
       }
-      if (this.dataset_n3 && this.dataset_n4) {
+      if (this.dataset_n3 && this.dataset_n4 && this.dataset_n6 && this.dataset_n7) {
         this.updateChart3();
         this.updateChart4();
         this.updateChart6();
@@ -353,9 +344,6 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     .attr('width', element.offsetWidth)
     .attr('height', element.offsetHeight);
 
-    console.log(element.offsetWidth);
-    
-
     this.chart_6 = svg_6
     .append('g')
     .attr('class', 'scatter')
@@ -373,7 +361,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     this.xAxis_6 = svg_6
     .append('g')
     .attr('class', 'xAxis6')
-    .attr('transform', `translate(${this.margin.left}, ${this.margin.top + this.height})`)
+    .attr('transform', `translate(${this.margin.left}, ${this.margin.top + this.height_6})`)
     .call(d3.axisBottom(this.xScale_6));
 
     this.yAxis_6 = svg_6
@@ -414,7 +402,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     this.xAxis_7 = svg_7
     .append('g')
     .attr('class', 'xAxis7')
-    .attr('transform', `translate(${this.margin.left}, ${this.margin.top + this.height})`)
+    .attr('transform', `translate(${this.margin.left}, ${this.margin.top + this.height_7})`)
     .call(d3.axisBottom(this.xScale_7));
 
     this.yAxis_7 = svg_7
