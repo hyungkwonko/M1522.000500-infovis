@@ -275,21 +275,26 @@ export class Seijun2Component implements OnInit, AfterViewInit {
       .data(this.data)
     update.exit().remove();
 
+    update.join('g')
+      .call(d => {
+        console.log("zkzkz");
+        console.log(d);
+      })
+
     // update chart
     update.join('g')
-      .attr('fill', d => this.colors(d.key))
+      // .attr('fill', d => this.colors(d.key))
+      .attr('fill', d => {
+        console.log(d);
+        d.forEach(e => {
+        });
+        return this.colors(d.key)
+      })
       .style('opacity', (d,i) => {
         return 1 - i * 0.08;
       })
       .selectAll('rect')
-      .data((d,i) => {
-        console.log("updatechartd: ===");
-        d.forEach(e => {
-          console.log(e);
-        });
-        // console.log(d[i]);
-        return d;
-      })
+      .data(d => d)
       .join('rect')
       .attr("stroke", "grey")
       .attr('width', this.xScale.bandwidth())
@@ -302,7 +307,6 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     
     // hover over mouse
     update.join('g')
-      .attr('fill', d => this.colors(d.key))
       .selectAll('rect')
       .data(d => d)
       .join('rect')
