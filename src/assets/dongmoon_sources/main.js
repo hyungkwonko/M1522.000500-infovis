@@ -19,6 +19,12 @@ var pausePlayStop = function(stop) {
     MIDI.player.loadFile(now_playing_path, MIDI.player.start);
     d.src = "../../assets/dongmoon_images/pause.png";
     is_stop = 0;
+
+    var status_bar1 = document.getElementById("bars6_0");
+    status_bar1.id = "play1";
+    var status_bar1 = document.getElementById("bars7_0");
+    status_bar1.id = "play2";
+
     return
   }
 
@@ -104,9 +110,9 @@ var MIDIPlayerPercentage = function() {
       is_stop = 1;
 
     var status_bar1 = document.getElementById("bars6_0");
-    status_bar1.style.width = 1 + 'px';
+    status_bar1.style.width = 3 + 'px';
     var status_bar2 = document.getElementById("bars7_0");
-    status_bar2.style.width = 1 + 'px';
+    status_bar2.style.width = 3 + 'px';
 
       return
     }
@@ -134,7 +140,7 @@ var MIDIPlayerPercentage = function() {
 
     // console.log (progress)
     
-    var status_bar1 = document.getElementById("bars6_0");
+    var status_bar1 = document.getElementById("play1");
     status_bar1.style.color = "#003b96"
     status_bar1.style.fill = "#003b96"
     status_bar1.style.width = 3 + 'px';
@@ -142,7 +148,7 @@ var MIDIPlayerPercentage = function() {
     // status_bar1.x = 973.11 * progress + 'px';
     status_bar1.style.height = 200;
 
-    var status_bar2 = document.getElementById("bars7_0");
+    var status_bar2 = document.getElementById("play2");
     status_bar2.style.color = "#003b96"
     status_bar2.style.fill = "#003b96"
     status_bar2.style.width = 3 + 'px';
