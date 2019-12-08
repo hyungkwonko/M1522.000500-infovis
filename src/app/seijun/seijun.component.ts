@@ -16,6 +16,8 @@ export class SeijunComponent implements OnInit, AfterViewInit {
 
   @ViewChild('svgRef2', {static: false}) svgRef2: ElementRef;
   @ViewChild('svgRef3', {static: false}) svgRef3: ElementRef;
+  @ViewChild('svgRef4', {static: false}) svgRef4: ElementRef;
+  @ViewChild('svgRef5', {static: false}) svgRef5: ElementRef;
   @Input() public mold: IMusic;
   // public data: Object = {};
   public dataset_n3: Array<any> = [];
@@ -42,8 +44,10 @@ export class SeijunComponent implements OnInit, AfterViewInit {
   private width: number;
   private elements_height: number = 10;
   private barPadding: number = 0.2;
+  private barPadding_7: number = 0.01;
   private barWidth_3: number;
   private barWidth_4: number;
+  private barWidth_7: number;
   private height: number ;
   private xScale_3: any;
   private yScale_3: any;
@@ -65,6 +69,8 @@ export class SeijunComponent implements OnInit, AfterViewInit {
 
   private chart_3: any;
   private chart_4: any;
+  private chart_6: any;
+  private chart_7: any;
 
   private start_n3: boolean = true;
 
@@ -207,11 +213,15 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       if(this.start_n3) {
         this.createChart3();
         this.createChart4();
+        this.createChart6();
+        this.createChart7();
         this.start_n3 = false;
       }
       if (this.dataset_n3 && this.dataset_n4) {
         this.updateChart3();
         this.updateChart4();
+        this.updateChart6();
+        this.updateChart7();
       }
     }
   }
@@ -225,6 +235,14 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       .style('stroke', 'red')
       .style('stroke-width', '2');
 
+    d3.select('#bars6_' + i)
+      .style('stroke', 'black')
+      .style('stroke-width', '2');
+
+    d3.select('#bars7_' + i)
+      .style('stroke', 'black')
+      .style('stroke-width', '2');
+
   }
 
   free_hovered(d, i) {
@@ -232,6 +250,14 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       .style('stroke-width', '0');
 
     d3.select('#bars4_' + i)
+      .style('stroke-width', '0');
+
+    d3.select('#bars6_' + i)
+      .style('stroke', 'black')
+      .style('stroke-width', '0');
+
+    d3.select('#bars7_' + i)
+      .style('stroke', 'black')
       .style('stroke-width', '0');
 
   }
@@ -302,6 +328,89 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       .attr('class', 'yAxis4')
       .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`)
       .call(d3.axisLeft(this.yScale_4));
+  }
+
+  createChart6() {
+    let element: any = this.svgRef4.nativeElement;
+
+    let svg_6 = d3.select(element)
+    .append('svg')
+    .attr('width', element.offsetWidth)
+    .attr('height', element.offsetHeight);
+
+    this.chart_6 = svg_6
+    .append('g')
+    .attr('class', 'scatter')
+    .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`);
+
+    this.xScale_6 = d3.scaleLinear()
+    .domain([d3.min(this.dataset_n6, d => d.val_x), d3.max(this.dataset_n6, d => d.val_x)])
+    .range([0, this.width]);
+
+    this.yScale_6 = d3.scaleLinear()
+    .domain([0, 127])
+    .range([this.height, 0]);
+
+    console.log(d3.min(this.dataset_n6, d => d.val_x))
+    console.log(d3.max(this.dataset_n6, d => d.val_x))
+    console.log(d3.min(this.dataset_n6, d => d.val_y))
+    console.log(d3.max(this.dataset_n6, d => d.val_y))    
+
+    // x&y axis
+    this.xAxis_6 = svg_6
+    .append('g')
+    .attr('class', 'xAxis6')
+    .attr('transform', `translate(${this.margin.left}, ${this.margin.top + this.height})`)
+    .call(d3.axisBottom(this.xScale_6));
+
+    this.yAxis_6 = svg_6
+    .append('g')
+    .attr('class', 'yAxis6')
+    .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`)
+    .call(d3.axisLeft(this.yScale_6));
+
+  }
+
+  createChart7() {
+    let element: any = this.svgRef5.nativeElement;
+    this.barWidth_7 = this.width / this.dataset_n7.length;
+
+    let svg_7 = d3.select(element)
+    .append('svg')
+    .attr('width', element.offsetWidth)
+    .attr('height', element.offsetHeight);
+
+    this.chart_7 = svg_7
+    .append('g')
+    .attr('class', 'bars7')
+    .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`);
+
+    this.xScale_7 = d3.scaleLinear()
+    .domain([d3.min(this.dataset_n7, d => d.val_x), d3.max(this.dataset_n7, d => d.val_x)])
+    .range([0, this.width]);
+
+    this.yScale_7 = d3.scaleLinear()
+    .domain([0, 127])
+    .range([this.height, 0]);
+
+    console.log(d3.min(this.dataset_n6, d => d.val_x))
+    console.log(d3.max(this.dataset_n6, d => d.val_x))
+    console.log(d3.min(this.dataset_n6, d => d.val_y))
+    console.log(d3.max(this.dataset_n6, d => d.val_y))    
+
+    // x&y axis
+    this.xAxis_7 = svg_7
+    .append('g')
+    .attr('class', 'xAxis7')
+    .attr('transform', `translate(${this.margin.left}, ${this.margin.top + this.height})`)
+    .call(d3.axisBottom(this.xScale_7));
+
+    this.yAxis_7 = svg_7
+    .append('g')
+    .attr('class', 'yAxis7')
+    .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`)
+    .call(d3.axisLeft(this.yScale_7));
+
   }
     
   updateChart3() {
@@ -386,6 +495,97 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     // hover over mouse
     this.chart_4
       .selectAll('.bar4')
+      .on('mouseover', (d, i) => this.set_hovered(d,i))
+      .on('mouseout', (d, i) => this.free_hovered(d,i))
+
+  }
+
+  updateChart6() {
+    this.xScale_6.domain([d3.min(this.dataset_n6, d => d.val_x), d3.max(this.dataset_n6, d => d.val_x)]);
+    this.yScale_6.domain([d3.min(this.dataset_n6, d => d.val_y), d3.max(this.dataset_n6, d => d.val_y)]);
+    this.xAxis_6.transition().call(d3.axisBottom(this.xScale_6));
+    this.yAxis_6.transition().call(d3.axisLeft(this.yScale_6));
+
+    let update_6 = this.chart_6.selectAll('.bar6')
+    .data(this.dataset_n6);
+
+    // remove existing bars
+
+    update_6.exit().remove();
+
+    this.chart_6.selectAll('.bar6').transition()
+    .attr('x', d => this.xScale_6(d.val_x))
+    .attr('y', d => this.yScale_6(d.val_y))
+    .attr('width', d => this.xScale_6(d.Timing_Difference))
+    .attr('height', this.elements_height)
+    .style('fill', d => d.color);
+
+    // remove existing bars
+    update_6
+    .enter()
+    .append('rect')
+    .attr('class', 'bar6')
+    .attr('id', (d,i) => 'bars6_' + i)
+    // .attr('class', d => {
+    //   // console.log(d.class)
+    //   return '.' + d.class;
+    // })
+    .attr('x', d => this.xScale_6(d.val_x))
+    .attr('width', d => this.xScale_6(d.Timing_Difference))
+    .attr('height', this.elements_height)
+    .style('fill', d => d.color)
+    .transition()
+    .attr('y', d => this.yScale_6(d.val_y))
+
+    // hover over mouse
+    this.chart_6
+      .selectAll('.bar6')
+      .on('mouseover', (d, i) => this.set_hovered(d,i))
+      .on('mouseout', (d, i) => this.free_hovered(d,i))
+
+  }
+
+  updateChart7() {
+    this.xScale_7.domain([d3.min(this.dataset_n7, d => d.val_x), d3.max(this.dataset_n7, d => d.val_x)]);
+    this.yScale_7.domain([d3.min(this.dataset_n7, d => d.val_y), d3.max(this.dataset_n7, d => d.val_y)]);
+    this.xAxis_7.transition().call(d3.axisBottom(this.xScale_7));
+    this.yAxis_7.transition().call(d3.axisLeft(this.yScale_7));
+
+    let update_7 = this.chart_7.selectAll('.bar7')
+    .data(this.dataset_n7);
+
+    // remove existing bars
+
+    update_7.exit().remove();
+
+    this.chart_7.selectAll('.bar7').transition()
+    .attr('x', d => this.xScale_7(d.val_x))
+    .attr('y', d => this.height - this.height*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
+    .attr('width', this.barWidth_7 - this.barPadding_7)
+    .attr('height', d => this.height*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
+    .style('fill', d => d3.interpolateOranges(d.val_y/d3.max(this.dataset_n7, d => d.val_y + 20)))
+
+    // remove existing bars
+    
+    update_7
+    .enter()
+    .append('rect')
+    .attr('class', 'bar7')
+    .attr('id', (d,i) => 'bars7_' + i)
+    // .attr('class', d => {
+    //   // console.log(d.class)
+    //   return '.' + d.class;
+    // })
+    .attr('x', d => this.xScale_7(d.val_x))
+    .attr('width', this.barWidth_7 - this.barPadding_7)
+    .attr('height', d => this.height*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
+    .style('fill', d => d3.interpolateOranges(d.val_y/d3.max(this.dataset_n7, d => d.val_y + 20)))
+    .transition()
+    .attr('y', d => this.height - this.height*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
+
+    // hover over mouse
+    this.chart_7
+      .selectAll('.bar7')
       .on('mouseover', (d, i) => this.set_hovered(d,i))
       .on('mouseout', (d, i) => this.free_hovered(d,i))
 
