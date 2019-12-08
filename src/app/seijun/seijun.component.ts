@@ -1,9 +1,6 @@
 import { IMusic } from './../music';
-import { Component, OnInit, ViewChild, Input, ElementRef, AfterViewInit} from '@angular/core';
+import { Component, OnInit, ViewChild, Input, ElementRef, AfterViewInit, SimpleChanges} from '@angular/core';
 import * as d3 from 'd3';
-
-import file_list from '../../../Preprocessing/preprocessed/file_list.json';
-import alb_esp1 from '../../../Preprocessing/preprocessed/data/alb_esp1.json';
 
 import * as _ from 'lodash';
 
@@ -143,7 +140,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     this.dataset_n6 = [];
     this.dataset_n7 = [];
 
-    for (let i = 0; i < this.mold.Notes.length; i++) {
+    for (let i = 0; i < this.mold.Notes.length; i++) { // this.mold.Notes.length
       if (this.mold.Notes[i].Note_velocity > 0) {
           this.note_on_off_pair.push(
           {
@@ -162,6 +159,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       this.return_data_v.push(this.getAllIndexes_v(this.note_on_off_pair, j));
       this.return_data_p.push(this.getAllIndexes_p(this.note_on_off_pair, j));
     };
+    
 
     for (let i = 1; i < 128; i++) {
       this.dataset_n3.push(
@@ -179,13 +177,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
         }
       );
     };
-
-    console.log("this.returndatasetV");
-    console.log(this.return_data_v);
-    console.log("this.returndatasetp");
-    console.log(this.return_data_p);
     
-
     for (let i = 0; i < this.mold.Notes.length; i++) {
       if (this.mold.Notes[i].Note_velocity > 0) {
         this.dataset_n6.push(
@@ -196,7 +188,8 @@ export class SeijunComponent implements OnInit, AfterViewInit {
             "val_y": this.mold.Notes[i].Note_position + this.elements_height/2,
             "pitch_class": this.mold.Notes[i].Note_pitch_class,
             'color': this.color[parseInt(this.mold.Notes[i].Note_position)%12],
-            "Timing_Difference": this.mold.Notes[i].End_timing - this.mold.Notes[i].Start_timing
+            "Timing_Difference": this.mold.Notes[i].End_timing - this.mold.Notes[i].Start_timing,
+            "State": this.mold.Notes[i].State
           }
         );
         this.dataset_n7.push(
@@ -205,6 +198,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
             "class": String(this.mold.Notes[i].ID),
             "val_x": this.mold.Notes[i].Start_timing,
             "val_y": this.mold.Notes[i].Note_velocity,
+            "State": this.mold.Notes[i].State
           }
         );
       }
@@ -219,8 +213,8 @@ export class SeijunComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
   }
 
-  ngOnChanges(changes) {
-    if (changes.mold.currentValue.Filename) {
+  ngOnChanges(changes: SimpleChanges) {
+    if (!changes.mold.isFirstChange()) {
       this.generateData();
       if(this.start_n3) {
         this.createChart3();
@@ -229,7 +223,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
         this.createChart7();
         this.start_n3 = false;
       }
-      if (this.dataset_n3 && this.dataset_n4) {
+      if (this.dataset_n3 && this.dataset_n4 && this.dataset_n6 && this.dataset_n7) {
         this.updateChart3();
         this.updateChart4();
         this.updateChart6();
@@ -353,9 +347,6 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     .attr('width', element.offsetWidth)
     .attr('height', element.offsetHeight);
 
-    console.log(element.offsetWidth);
-    
-
     this.chart_6 = svg_6
     .append('g')
     .attr('class', 'scatter')
@@ -373,7 +364,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     this.xAxis_6 = svg_6
     .append('g')
     .attr('class', 'xAxis6')
-    .attr('transform', `translate(${this.margin.left}, ${this.margin.top + this.height})`)
+    .attr('transform', `translate(${this.margin.left}, ${this.margin.top + this.height_6})`)
     .call(d3.axisBottom(this.xScale_6));
 
     this.yAxis_6 = svg_6
@@ -414,7 +405,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     this.xAxis_7 = svg_7
     .append('g')
     .attr('class', 'xAxis7')
-    .attr('transform', `translate(${this.margin.left}, ${this.margin.top + this.height})`)
+    .attr('transform', `translate(${this.margin.left}, ${this.margin.top + this.height_7})`)
     .call(d3.axisBottom(this.xScale_7));
 
     this.yAxis_7 = svg_7

@@ -4,7 +4,7 @@
   <!-- Tool bar -->
   <mat-toolbar class="hk-toolbar">  
     <mat-toolbar-row>
-      <span>InfoVis term project</span>
+      <span>Musical structure visualization system (Optimized for 1920x1080 screen)</span>
     </mat-toolbar-row>
   </mat-toolbar>
   
@@ -13,15 +13,19 @@
     <div class="hk-row">
       <div>
         <h3>Choose from list</h3>
-        <mat-form-field>
-          <mat-label>Choose music</mat-label>
-          <mat-select ngModel (ngModelChange)="updateData($event)" [(ngModel)]="appData">
-            <mat-option *ngFor="let file of files" [value]="file">
-              {{file}}
-            </mat-option>
-          </mat-select>
-        </mat-form-field>
-        <p *ngIf="appData; else otherTemplate">Current music: {{ appData }}</p>
+        <div id="glist">
+          <div id="glist2">
+            <mat-form-field>
+              <mat-label>Choose music</mat-label>
+              <mat-select ngModel (ngModelChange)="updateData($event)" [(ngModel)]="appData">
+                <mat-option *ngFor="let file of files" [value]="file">
+                  {{file}}
+                </mat-option>
+              </mat-select>
+            </mat-form-field>
+          </div>
+          <p *ngIf="appData; else otherTemplate">Current music: {{ appData }}</p>
+        </div>
         <ng-template #otherTemplate>
           <p>Music is not yet specified</p> 
         </ng-template>
@@ -38,7 +42,7 @@
       <!-- <app-hyungkwon></app-hyungkwon> -->
     </mat-grid-tile>
     <mat-grid-tile [colspan] = "7" [rowspan] = "6">
-      <app-seijun [mold]="receivedData"></app-seijun>
+      <app-dantae [data]="receivedData"></app-dantae>>
     </mat-grid-tile>
     <mat-grid-tile [colspan] = "3" [rowspan] = "3">
       <app-dongmoon></app-dongmoon>
@@ -47,7 +51,7 @@
       <app-seijun2 [mold]="receivedData"></app-seijun2>
     </mat-grid-tile>
     <mat-grid-tile [colspan] = "7" [rowspan] = "6">
-      <app-dantae [data]="receivedData"></app-dantae>
+      <app-seijun [mold]="receivedData"></app-seijun>
     </mat-grid-tile>
   </mat-grid-list>
 

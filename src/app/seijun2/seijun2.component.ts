@@ -1,5 +1,5 @@
 import { IMusic } from './../music';
-import { Component, OnInit, ViewChild, Input, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, Input, ElementRef, AfterViewInit, SimpleChanges } from '@angular/core';
 import * as d3 from 'd3';
 
 // https://bl.ocks.org/LemoNode/5a64865728c6059ed89388b5f83d6b67
@@ -199,8 +199,8 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     // }
   }
 
-  ngOnChanges(changes) {
-    if (changes.mold.currentValue.Filename) {
+  ngOnChanges(changes: SimpleChanges) {
+    if (!changes.mold.isFirstChange()) {
       this.generatePitchOctave();
       this.generateData();
 
