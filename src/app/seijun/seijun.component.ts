@@ -461,7 +461,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     update3.exit().remove();
 
     // update3 existing bars
-    this.chart_3.selectAll('.bar3').transition()
+    update3.transition()
       .attr("width", this.barWidth_3 - this.barPadding)
       .attr("height", (d, i) => this.height*(d.n_Note_velocity)/d3.max(this.dataset_n3, d => d.n_Note_velocity))
       .attr('x', (d, i) => this.xScale_3(d.Note_velocity))
@@ -477,17 +477,12 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       .attr('x', (d, i) => this.xScale_3(d.Note_velocity))
       .attr('y', d => this.yScale_3(0))
       .attr('height', 0)
+      .on('mouseover', (d, i) => this.set_hovered(d,i))
+      .on('mouseout', (d, i) => this.free_hovered(d,i))
       .transition()
       .delay((d, i) => i * 5)
       .attr('y', (d, i) => this.height - this.height*(d.n_Note_velocity)/d3.max(this.dataset_n3, d => d.n_Note_velocity))
       .attr("height", (d, i) => this.height*(d.n_Note_velocity)/d3.max(this.dataset_n3, d => d.n_Note_velocity));
-
-    // hover over mouse
-    this.chart_3
-      .selectAll('.bar3')
-      .on('mouseover', (d, i) => this.set_hovered(d,i))
-      .on('mouseout', (d, i) => this.free_hovered(d,i))
-
   }
 
   updateChart4() {
@@ -500,17 +495,15 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     .data(this.dataset_n4);
 
     // remove existing bars
-
     update4.exit().remove();
 
-    this.chart_4.selectAll('.bar4').transition()
+    update4.transition()
       .attr('x', d => this.xScale_4(d.Note_position))
       .attr('y', d => this.height - this.height*(d.n_Note_position)/d3.max(this.dataset_n4, d => d.n_Note_position))
       .attr('width', this.barWidth_4 - this.barPadding)
       .attr('height', (d, i) => this.height*(d.n_Note_position)/d3.max(this.dataset_n4, d => d.n_Note_position))
       .style('fill', d => d.color)
 
-    // remove existing bars
     update4
       .enter()
       .append('rect')
@@ -519,17 +512,12 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       .attr('x', d => this.xScale_4(d.Note_position))
       .attr('width', this.barWidth_4 - this.barPadding)
       .style('fill', d => d.color)
-      .transition()
-      .attr('y', d => this.height - this.height*(d.n_Note_position)/d3.max(this.dataset_n4, d => d.n_Note_position))
-      .attr('height', (d, i) => this.height*(d.n_Note_position)/d3.max(this.dataset_n4, d => d.n_Note_position))
-
-    // hover over mouse
-    this.chart_4
-      .selectAll('.bar4')
       .on('mouseover', (d, i) => this.set_hovered(d,i))
       .on('mouseout', (d, i) => this.free_hovered(d,i))
-
-  }
+      .transition()
+      .attr('height', (d, i) => this.height*(d.n_Note_position)/d3.max(this.dataset_n4, d => d.n_Note_position))
+      .attr('y', d => this.height - this.height*(d.n_Note_position)/d3.max(this.dataset_n4, d => d.n_Note_position))
+ }
 
   updateChart6() {
     this.xScale_6.domain([d3.min(this.dataset_n6, d => d.val_x), d3.max(this.dataset_n6, d => d.val_x)]);
@@ -593,19 +581,17 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       .style('fill', d => d3.interpolateOranges(d.val_y/d3.max(this.dataset_n7, d => d.val_y + 20)))
 
     update_7
-    .enter()
-    .append('rect')
-    .attr('class', 'bar7')
-    .attr('id', (d,i) => 'bars7_' + i)
-    .attr('x', d => this.xScale_7(d.val_x))
-    .attr('width', this.barWidth_7 - this.barPadding_7)
-    .attr('height', d => this.height_7*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
-    .style('fill', d => d3.interpolateOranges(d.val_y/d3.max(this.dataset_n7, d => d.val_y + 20)))
-    .on('mouseover', (d, i) => this.set_hovered(d,i))
-    .on('mouseout', (d, i) => this.free_hovered(d,i))
-    .transition()
-    .attr('y', d => this.height_7 - this.height_7*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
-
+      .enter()
+      .append('rect')
+      .attr('class', 'bar7')
+      .attr('id', (d,i) => 'bars7_' + i)
+      .attr('x', d => this.xScale_7(d.val_x))
+      .attr('width', this.barWidth_7 - this.barPadding_7)
+      .attr('height', d => this.height_7*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
+      .style('fill', d => d3.interpolateOranges(d.val_y/d3.max(this.dataset_n7, d => d.val_y + 20)))
+      .on('mouseover', (d, i) => this.set_hovered(d,i))
+      .on('mouseout', (d, i) => this.free_hovered(d,i))
+      .transition()
+      .attr('y', d => this.height_7 - this.height_7*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
   }
-
 }
