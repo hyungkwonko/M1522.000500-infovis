@@ -37,7 +37,9 @@ export class DantaeComponent implements OnInit, AfterViewInit {
   }
 
   ngOnChanges(changes) {
-    if (changes.hasOwnProperty('data') && changes.data.currentValue.Filename) {
+    if (typeof changes !== "undefined" && 'data' in changes &&
+      typeof changes.data.currentValue !== "undefined" &&
+      'Filename' in changes.data.currentValue && changes.data.currentValue.Filename) {
       this.beforeRendering();
       setTimeout(this.createScore, 1, this);
     }
@@ -89,7 +91,6 @@ export class DantaeComponent implements OnInit, AfterViewInit {
     let height = 0;
     let voices = [];
     let formatter = new VF.Formatter();
-    console.log(obj.data)
     let measureCount = obj.data.Score.Staves[0].length;
   
     obj.data.Score.Staves.forEach(voiceData => {
@@ -111,7 +112,6 @@ export class DantaeComponent implements OnInit, AfterViewInit {
             stave.addClef(notation.Options);
           }
           else if (notation.Type === 'key_signature') {
-            console.log("key_signature " + notation.Options);
             stave.addKeySignature(notation.Options);
           }
           else if (notation.Type === 'time_signature') {
@@ -245,11 +245,12 @@ export class DantaeComponent implements OnInit, AfterViewInit {
         return;
       }
 
-      /*
       let enter = d3.select(notehead)
                     .data([noteData], function(d) { return noteID.toString() })
-                    .enter();
-      */
+                    .enter()
+                    .on('mouseenter', d => {d3.select(notehead).attr('fill', 'red')})//d => d.State.hovered = true)
+                    .on('mouseout', d => {d3.select(notehead).attr('fill', 'blue')})//d => d.State.hovered = false)
+
       let update = d3.select(notehead)
                      .data([noteData], function(d) { return noteID.toString() })
                      .attr('fill', d => /*color(d.state)*/'blue')  // 색 함수(state => colorString)에 넣어서 처리
