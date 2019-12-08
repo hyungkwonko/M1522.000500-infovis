@@ -246,11 +246,13 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     // bar colors
     this.colors = d3.scaleOrdinal()
       .domain(this.data.map(d => d.key))
-      .range(d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), this.data.length).reverse())
-      .unknown('#ccc');
+      // .range(d3.quantize(t => d3.interpolateGreens(t * 0.4 + 0.1), this.data.length).reverse())
+      // .range(d3.quantize(d3.interpolateRgb("green", "greenyellow"), this.data.length))
+      // .range(d3.quantize(d3.interpolateRgb("#CFE6D8", "#031A0C"), this.data.length))
+      .range(d3.quantize(d3.interpolateHsl(d3.hsl(145, 1, 0), d3.hsl(145, 0, 0.95)), this.data.length))
+      // .unknown('#ccc');
 
-    // color = ["#77D977", "#A877D9", "#D9D977", "#77A8D9", "#D97777", "#77D9A8", "#D977D9", "#A8D977", "#7777D9", "#D9A877", "#77D9D9", "#D977A8"];
-    // pitch_domain = ['C', 'C#', 'D', 'D#','E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    // hue: 145, sat: 87.9, value: 83.9: #1ad669
 
     // x & y axis
     this.xAxis = svg.append('g')
@@ -268,8 +270,11 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     this.xScale.domain(this.pitch.map(d => d));
     this.yScale.domain([0, d3.max(this.data, d => d3.max(d, d => d[1]))]);
     this.colors.domain(this.data.map(d => d.key));
-    this.xAxis.transition().call(d3.axisBottom(this.xScale));
-    this.yAxis.transition().call(d3.axisLeft(this.yScale));
+    this.xAxis.call(d3.axisBottom(this.xScale));
+    this.yAxis.call(d3.axisLeft(this.yScale));
+
+    console.log("this.colors");
+    console.log(this.colors);
     
     // remove existing data
     let update = this.chart.selectAll('g')
@@ -279,6 +284,9 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     // update chart
     update.join('g')
       .attr('fill', d => this.colors(d.key))
+      // .style('opacity', (d,i) => {
+      //   return 1 - i * 0.18;
+      // })
       .selectAll('rect')
       .data(d => d)
       .join('rect')
@@ -287,13 +295,12 @@ export class Seijun2Component implements OnInit, AfterViewInit {
       .attr('height', d => this.yScale(d[0]) - this.yScale(d[1]))
       .transition()
       .delay((d, i) => i * 30)
-        .attr('y', d => this.yScale(d[1]))
-        .attr('x', (d, i) => this.xScale(d.data.Class))
-        .ease(d3.easeLinear);
+      .attr('y', d => this.yScale(d[1]))
+      .attr('x', (d, i) => this.xScale(d.data.Class))
+      .ease(d3.easeLinear);
     
     // hover over mouse
     update.join('g')
-      .attr('fill', d => this.colors(d.key))
       .selectAll('rect')
       .data(d => d)
       .join('rect')
@@ -407,53 +414,3 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     return result;
   }
 }
-
-// let update = this.chart.selectAll('g')
-// .data(this.data)
-// // .join('g')
-// // .selectAll('rect')
-// // .data(d => d);
-
-// // remove exiting bars
-// update.exit().remove();
-
-// // update existing bars
-// this.chart.selectAll('g')
-// .data(this.data)
-// .join('g')
-// .attr('fill', d => this.colors(d.key))
-// // .style('opacity', (d,i) => {
-// //     return 1 - i * 0.08;
-// //   })
-// .selectAll('rect')
-// .data(d => d)
-// .join('rect')
-// // .transition()
-// // .duration(0)
-// .attr('x', (d, i) => this.xScale(d.data.Class))
-// .attr('y', d => this.yScale(d[1]))
-// .attr('height', d => this.yScale(d[0]) - this.yScale(d[1]))
-// .attr('width', this.xScale.bandwidth())
-// .attr("stroke", "grey");
-
-// this.chart.selectAll('g')
-// .data(this.data)
-// .join('g')
-//   .attr('fill', d => this.colors(d.key))
-// .selectAll('rect')
-// .data(d => d)
-// .join('rect')
-//   .on('mouseover', function (d, i) {
-//       d3.select(this)
-//       .transition()
-//       .duration(30)
-//         .attr('stroke', 'red')
-//         .attr('stroke-width', "2px")
-//   })
-//   .on('mouseout', function (d, i) {
-//       d3.select(this)
-//         .transition()
-//         .duration(30)
-//         .attr('stroke', 'grey')
-//         .attr('stroke-width', "1px")
-//   });
