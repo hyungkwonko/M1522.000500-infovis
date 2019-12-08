@@ -247,15 +247,12 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     this.colors = d3.scaleOrdinal()
       .domain(this.data.map(d => d.key))
       // .range(d3.quantize(t => d3.interpolateGreens(t * 0.4 + 0.1), this.data.length).reverse())
-      .range(d3.quantize(d3.interpolateRgb("lime", "white"), this.data.length))
-      // .range(["#04BC51", "#04D65C", "#1AD668", "#2FD675", "#45D681", "#5AD68E", "#6FD69A", "85D6A7", "9AD6B3"])
-      .unknown('#ccc');
+      // .range(d3.quantize(d3.interpolateRgb("green", "greenyellow"), this.data.length))
+      // .range(d3.quantize(d3.interpolateRgb("#CFE6D8", "#031A0C"), this.data.length))
+      .range(d3.quantize(d3.interpolateHsl(d3.hsl(145, 1, 0), d3.hsl(145, 0, 0.95)), this.data.length))
+      // .unknown('#ccc');
 
-    // hue: 145
-    // sat: 87.9
-    // value: 83.9: #1ad669
-    // color = ["#77D977", "#A877D9", "#D9D977", "#77A8D9", "#D97777", "#77D9A8", "#D977D9", "#A8D977", "#7777D9", "#D9A877", "#77D9D9", "#D977A8"];
-    // pitch_domain = ['C', 'C#', 'D', 'D#','E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
+    // hue: 145, sat: 87.9, value: 83.9: #1ad669
 
     // x & y axis
     this.xAxis = svg.append('g')
