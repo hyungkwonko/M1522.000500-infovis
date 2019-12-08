@@ -2,8 +2,6 @@ body {
 	font-family: arial;
 	font-size: 1.2em;
 	line-height: 1.5em;
-	background: #fcfae9;
-	color: #907d62;
 	margin: 0 50px;
 }
 
@@ -189,7 +187,6 @@ h1 {
 	font-family: arial;
 	font-size: 9px;
 	line-height: 9px;
-	color: #aaa;
 	width: 30px;
 	height: 9px;
 	background: #000;
@@ -199,4 +196,8 @@ h1 {
 
 #time_bar {
 	margin-bottom: 50px; border: 1px solid #000; background: rgba(255,255,255,0.5); border-radius: 11px; float: left; width: 440px; padding-bottom: 15px;	
+}
+
+#currenttime {
+	opacity:0; background-color:#FFFFFF; color:#FFFFFF;
 }
