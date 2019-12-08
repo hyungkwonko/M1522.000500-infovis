@@ -159,6 +159,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       this.return_data_v.push(this.getAllIndexes_v(this.note_on_off_pair, j));
       this.return_data_p.push(this.getAllIndexes_p(this.note_on_off_pair, j));
     };
+    
 
     for (let i = 1; i < 128; i++) {
       this.dataset_n3.push(
@@ -187,7 +188,8 @@ export class SeijunComponent implements OnInit, AfterViewInit {
             "val_y": this.mold.Notes[i].Note_position + this.elements_height/2,
             "pitch_class": this.mold.Notes[i].Note_pitch_class,
             'color': this.color[parseInt(this.mold.Notes[i].Note_position)%12],
-            "Timing_Difference": this.mold.Notes[i].End_timing - this.mold.Notes[i].Start_timing
+            "Timing_Difference": this.mold.Notes[i].End_timing - this.mold.Notes[i].Start_timing,
+            "State": this.mold.Notes[i].State
           }
         );
         this.dataset_n7.push(
@@ -196,6 +198,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
             "class": String(this.mold.Notes[i].ID),
             "val_x": this.mold.Notes[i].Start_timing,
             "val_y": this.mold.Notes[i].Note_velocity,
+            "State": this.mold.Notes[i].State
           }
         );
       }
