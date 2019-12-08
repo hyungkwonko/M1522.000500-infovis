@@ -25,7 +25,6 @@ export class Seijun2Component implements OnInit, AfterViewInit {
   public pitchCount: any;
   public octave: Array<any> = [];
   public title = 'Note pitch class distribution';
-  public key = '';
   public keys: Array<any> = [];
   public len: number;
   public files: Array<any> = [];
@@ -213,7 +212,7 @@ export class Seijun2Component implements OnInit, AfterViewInit {
         this.updateChart();
       }
       this.sortChart(Event);
-      this.key = '(Key may be ' + this.findKeyFromDistribution() + ')';
+      document.getElementById("found-key").innerHTML = '(Key may be <span style="color:#1ad669">' + this.findKeyFromDistribution() + '</span>)';
     }
   }
 
