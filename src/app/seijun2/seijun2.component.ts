@@ -246,9 +246,14 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     // bar colors
     this.colors = d3.scaleOrdinal()
       .domain(this.data.map(d => d.key))
-      .range(d3.quantize(t => d3.interpolateSpectral(t * 0.8 + 0.1), this.data.length).reverse())
+      // .range(d3.quantize(t => d3.interpolateGreens(t * 0.4 + 0.1), this.data.length).reverse())
+      .range(d3.quantize(d3.interpolateRgb("lime", "white"), this.data.length))
+      // .range(["#04BC51", "#04D65C", "#1AD668", "#2FD675", "#45D681", "#5AD68E", "#6FD69A", "85D6A7", "9AD6B3"])
       .unknown('#ccc');
 
+    // hue: 145
+    // sat: 87.9
+    // value: 83.9: #1ad669
     // color = ["#77D977", "#A877D9", "#D9D977", "#77A8D9", "#D97777", "#77D9A8", "#D977D9", "#A8D977", "#7777D9", "#D9A877", "#77D9D9", "#D977A8"];
     // pitch_domain = ['C', 'C#', 'D', 'D#','E', 'F', 'F#', 'G', 'G#', 'A', 'A#', 'B'];
 
@@ -270,30 +275,21 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     this.colors.domain(this.data.map(d => d.key));
     this.xAxis.transition().call(d3.axisBottom(this.xScale));
     this.yAxis.transition().call(d3.axisLeft(this.yScale));
+
+    console.log("this.colors");
+    console.log(this.colors);
     
     // remove existing data
     let update = this.chart.selectAll('g')
       .data(this.data)
     update.exit().remove();
 
-    update.join('g')
-      .call(d => {
-        console.log("zkzkz");
-        console.log(d);
-      })
-
     // update chart
     update.join('g')
-      // .attr('fill', d => this.colors(d.key))
-      .attr('fill', d => {
-        console.log(d);
-        d.forEach(e => {
-        });
-        return this.colors(d.key)
-      })
-      .style('opacity', (d,i) => {
-        return 1 - i * 0.08;
-      })
+      .attr('fill', d => this.colors(d.key))
+      // .style('opacity', (d,i) => {
+      //   return 1 - i * 0.18;
+      // })
       .selectAll('rect')
       .data(d => d)
       .join('rect')
@@ -421,53 +417,3 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     return result;
   }
 }
-
-// let update = this.chart.selectAll('g')
-// .data(this.data)
-// // .join('g')
-// // .selectAll('rect')
-// // .data(d => d);
-
-// // remove exiting bars
-// update.exit().remove();
-
-// // update existing bars
-// this.chart.selectAll('g')
-// .data(this.data)
-// .join('g')
-// .attr('fill', d => this.colors(d.key))
-// // .style('opacity', (d,i) => {
-// //     return 1 - i * 0.08;
-// //   })
-// .selectAll('rect')
-// .data(d => d)
-// .join('rect')
-// // .transition()
-// // .duration(0)
-// .attr('x', (d, i) => this.xScale(d.data.Class))
-// .attr('y', d => this.yScale(d[1]))
-// .attr('height', d => this.yScale(d[0]) - this.yScale(d[1]))
-// .attr('width', this.xScale.bandwidth())
-// .attr("stroke", "grey");
-
-// this.chart.selectAll('g')
-// .data(this.data)
-// .join('g')
-//   .attr('fill', d => this.colors(d.key))
-// .selectAll('rect')
-// .data(d => d)
-// .join('rect')
-//   .on('mouseover', function (d, i) {
-//       d3.select(this)
-//       .transition()
-//       .duration(30)
-//         .attr('stroke', 'red')
-//         .attr('stroke-width', "2px")
-//   })
-//   .on('mouseout', function (d, i) {
-//       d3.select(this)
-//         .transition()
-//         .duration(30)
-//         .attr('stroke', 'grey')
-//         .attr('stroke-width', "1px")
-//   });
