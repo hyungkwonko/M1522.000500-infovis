@@ -29,7 +29,6 @@ export class AppComponent {
     d.Notes.forEach(d => {
       d.State = { selected: true, hovered: false, playing: false };
     });
-    console.log(d);
   }
 
   public updateData($event) {
