@@ -103,6 +103,12 @@ var MIDIPlayerPercentage = function() {
       d.src = "../../assets/dongmoon_images/play.png";
       MIDI.player.stop ()
       is_stop = 1;
+
+    var status_bar1 = document.getElementById("bars6_0");
+    status_bar1.style.width = 1 + 'px';
+    var status_bar2 = document.getElementById("bars7_0");
+    status_bar2.style.width = 1 + 'px';
+
       return
     }
 
@@ -129,17 +135,18 @@ var MIDIPlayerPercentage = function() {
     // console.log (progress)
     
     var status_bar1 = document.getElementById("bars6_0");
-    status_bar1.style.color = "red"
-    status_bar1.style.width = 1000 * progress + 'px';
+    status_bar1.style.color = "#EB7A7A"
+    status_bar1.style.fill = "#EB7A7A"
+    status_bar1.style.width = 973.11 * progress + 'px';
     status_bar1.style.height = 150;
     // status_bar1.x = 100000 * progress;
     // status_bar1.x = 300;
 
-    // var status_bar2 = document.getElementById("bars7_0");
-    // status_bar2.style.color = "red"
-    // status_bar2.style.width = 3;
-    // status_bar2.style.height = 150;
-    // status_bar2.x = 100000 * progress;
+    var status_bar2 = document.getElementById("bars7_0");
+    status_bar2.style.color = "#EB7A7A"
+    status_bar2.style.fill = "#EB7A7A"
+    status_bar2.style.width = 973.11 * progress + 'px';
+    status_bar2.style.height = 150;
   });
 };
     
