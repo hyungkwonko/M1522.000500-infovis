@@ -59,6 +59,9 @@ export class DantaeComponent implements OnInit, AfterViewInit {
   afterRendering(obj) {
     console.log("score rendering complete");
     obj.value = 0;
+    if (typeof obj.group !== "undefined") {
+      obj.group.style.transform = "translate(-0px, 0)";
+    }
     obj.disabled = false;
     obj.spinner.style.display = "none";
     obj.hasRendered = true;
@@ -281,7 +284,7 @@ export class DantaeComponent implements OnInit, AfterViewInit {
   }
 
   onSliderChange(event: MatSliderChange) {
-    if (event.value >= 0) {
+    if (event.value >= 0 && typeof this.group !== "undefined") {
       this.group.style.transform = "translate(-" + event.value + "px, 0)";
     }
   }
