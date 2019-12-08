@@ -185,6 +185,27 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     console.log("this.returndatasetp");
     console.log(this.return_data_p);
     
+    this.dataset_n6.push (
+      {
+        "ID": 0,
+        "class": '0',
+        "val_x": 0,
+        "val_y": 127,
+        'color': 'red',
+        "Timing_Difference": 1
+      }
+    );
+
+    this.dataset_n7.push (
+      {
+        "ID": 0,
+        "class": '0',
+        "val_x": 0,
+        "val_y": 127,
+        'color': 'red',
+        "Timing_Difference": 1
+      }
+    );
 
     for (let i = 0; i < this.mold.Notes.length; i++) {
       if (this.mold.Notes[i].Note_velocity > 0) {
