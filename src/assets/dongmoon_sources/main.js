@@ -149,8 +149,37 @@ var MIDIPlayerPercentage = function() {
     // status_bar2.style.width = 973.11 * progress + 'px';
     status_bar2.setAttribute('x', 973.11 * progress + 'px');
     status_bar2.style.height = 100;
+
+    var divcurtime = document.getElementById ("currenttime");
+    divcurtime.innerHTML = event.currentTime;
   });
 };
+
+
+// create an observer instance
+var observer = new MutationObserver(function(mutations) {
+    mutations.forEach(function(mutation) {
+      console.log ("mutation")
+      var timeCursor = document.getElementById("cursor");
+      timeCursor.style.width = '0px';
+    });
+});
+
+function addObserverIfDesiredNodeAvailable() {
+  var target = document.querySelector(".ng-tns-c6-1 .ng-star-inserted span");
+  if(!target) {
+      //The node we need does not exist yet.
+      //Wait 500ms and try again
+      window.setTimeout(addObserverIfDesiredNodeAvailable,500);
+      return;
+  }
+  var config = { attributes: true, childList: true, characterData: true };
+  observer.observe(target,config);
+}
+addObserverIfDesiredNodeAvailable();
+
+
+
     
   // Begin loading indication.
   // var player;
