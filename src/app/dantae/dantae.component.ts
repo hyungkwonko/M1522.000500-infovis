@@ -111,6 +111,7 @@ export class DantaeComponent implements OnInit, AfterViewInit {
             stave.addClef(notation.Options);
           }
           else if (notation.Type === 'key_signature') {
+            console.log("key_signature " + notation.Options);
             stave.addKeySignature(notation.Options);
           }
           else if (notation.Type === 'time_signature') {
@@ -155,7 +156,7 @@ export class DantaeComponent implements OnInit, AfterViewInit {
         VF.Accidental.applyAccidentals([voice], measure.Key_signature);
         voice.setStrict(false).addTickables(notes).setStave(stave);
   
-        formatter.joinVoices([voice]).format([voice]);
+        formatter.joinVoices([voice]).formatToStave([voice], stave);
         voiceInMeasures.push([voice, stave, x]);
         height = Math.max(voice.getBoundingBox().getH() * 1.3, height);
   
@@ -198,7 +199,7 @@ export class DantaeComponent implements OnInit, AfterViewInit {
   
       let startX = Math.max(...s.map(getNoteStartX));
       s.forEach(stave => stave[0].setNoteStartX(startX));
-      
+
       formatter.format(f, width - (startX - s[0][1]));
       voices.forEach(v => v[i][0].setContext(ctx).draw());
     }
@@ -240,7 +241,7 @@ export class DantaeComponent implements OnInit, AfterViewInit {
         notehead = noteheadG[index].firstChild;
       }
       else {
-        console.log(noteID.toString() + " does not exist!");
+        //console.log(noteID.toString() + " does not exist!");
         return;
       }
 
