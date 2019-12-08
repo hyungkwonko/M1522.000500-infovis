@@ -125,6 +125,21 @@ var MIDIPlayerPercentage = function() {
     timeCursor.style.width = (progress * 100) + "%";
     // time1.innerHTML = timeFormatting(currentTime);
     // time2.innerHTML = "-" + timeFormatting(duration - currentTime);
+
+    // console.log (progress)
+    
+    var status_bar1 = document.getElementById("bars6_0");
+    status_bar1.style.color = "red"
+    status_bar1.style.width = 1000 * progress + 'px';
+    status_bar1.style.height = 150;
+    // status_bar1.x = 100000 * progress;
+    // status_bar1.x = 300;
+
+    // var status_bar2 = document.getElementById("bars7_0");
+    // status_bar2.style.color = "red"
+    // status_bar2.style.width = 3;
+    // status_bar2.style.height = 150;
+    // status_bar2.x = 100000 * progress;
   });
 };
     
