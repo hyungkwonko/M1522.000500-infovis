@@ -182,6 +182,25 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       );
     };
     
+    this.dataset_n6.push(
+      {
+        "val_x": 0,
+        "val_y": 127,
+        "pitch_class": 0,
+        'color': 'yellow',
+        "Timing_Difference": 1000
+      }
+    );
+    this.dataset_n7.push(
+      {
+        "val_x": 0,
+        "val_y": 127,
+        "pitch_class": 0,
+        'color': 'yellow',
+        "Timing_Difference": 1000
+      }
+    );
+
     for (let i = 0; i < this.mold.Notes.length; i++) {
       if (this.mold.Notes[i].Note_velocity > 0) {
         this.dataset_n6.push(
