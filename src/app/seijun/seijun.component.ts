@@ -74,6 +74,12 @@ export class SeijunComponent implements OnInit, AfterViewInit {
 
   private start_n3: boolean = true;
 
+  private width_6: number;
+  private height_6: number;
+  private width_7: number;
+  private height_7: number;
+
+
 
   // Helper Variables
       
@@ -173,6 +179,12 @@ export class SeijunComponent implements OnInit, AfterViewInit {
         }
       );
     };
+
+    console.log("this.returndatasetV");
+    console.log(this.return_data_v);
+    console.log("this.returndatasetp");
+    console.log(this.return_data_p);
+    
 
     for (let i = 0; i < this.mold.Notes.length; i++) {
       if (this.mold.Notes[i].Note_velocity > 0) {
@@ -332,11 +344,17 @@ export class SeijunComponent implements OnInit, AfterViewInit {
 
   createChart6() {
     let element: any = this.svgRef4.nativeElement;
+    this.width_6 = element.offsetWidth - this.margin.left - this.margin.right;
+    this.height_6 = element.offsetHeight - this.margin.top - this.margin.bottom;
+
 
     let svg_6 = d3.select(element)
     .append('svg')
     .attr('width', element.offsetWidth)
     .attr('height', element.offsetHeight);
+
+    console.log(element.offsetWidth);
+    
 
     this.chart_6 = svg_6
     .append('g')
@@ -345,16 +363,11 @@ export class SeijunComponent implements OnInit, AfterViewInit {
 
     this.xScale_6 = d3.scaleLinear()
     .domain([d3.min(this.dataset_n6, d => d.val_x), d3.max(this.dataset_n6, d => d.val_x)])
-    .range([0, this.width]);
+    .range([0, this.width_6]);
 
     this.yScale_6 = d3.scaleLinear()
     .domain([0, 127])
-    .range([this.height, 0]);
-
-    console.log(d3.min(this.dataset_n6, d => d.val_x))
-    console.log(d3.max(this.dataset_n6, d => d.val_x))
-    console.log(d3.min(this.dataset_n6, d => d.val_y))
-    console.log(d3.max(this.dataset_n6, d => d.val_y))    
+    .range([this.height_6, 0]);
 
     // x&y axis
     this.xAxis_6 = svg_6
@@ -375,6 +388,10 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     let element: any = this.svgRef5.nativeElement;
     this.barWidth_7 = this.width / this.dataset_n7.length;
 
+    this.width_7 = element.offsetWidth - this.margin.left - this.margin.right;
+    this.height_7 = element.offsetHeight - this.margin.top - this.margin.bottom;
+
+
     let svg_7 = d3.select(element)
     .append('svg')
     .attr('width', element.offsetWidth)
@@ -387,16 +404,11 @@ export class SeijunComponent implements OnInit, AfterViewInit {
 
     this.xScale_7 = d3.scaleLinear()
     .domain([d3.min(this.dataset_n7, d => d.val_x), d3.max(this.dataset_n7, d => d.val_x)])
-    .range([0, this.width]);
+    .range([0, this.width_7]);
 
     this.yScale_7 = d3.scaleLinear()
     .domain([0, 127])
-    .range([this.height, 0]);
-
-    console.log(d3.min(this.dataset_n6, d => d.val_x))
-    console.log(d3.max(this.dataset_n6, d => d.val_x))
-    console.log(d3.min(this.dataset_n6, d => d.val_y))
-    console.log(d3.max(this.dataset_n6, d => d.val_y))    
+    .range([this.height_7, 0]);
 
     // x&y axis
     this.xAxis_7 = svg_7
@@ -560,9 +572,9 @@ export class SeijunComponent implements OnInit, AfterViewInit {
 
     this.chart_7.selectAll('.bar7').transition()
     .attr('x', d => this.xScale_7(d.val_x))
-    .attr('y', d => this.height - this.height*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
+    .attr('y', d => this.height_7 - this.height_7*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
     .attr('width', this.barWidth_7 - this.barPadding_7)
-    .attr('height', d => this.height*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
+    .attr('height', d => this.height_7*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
     .style('fill', d => d3.interpolateOranges(d.val_y/d3.max(this.dataset_n7, d => d.val_y + 20)))
 
     // remove existing bars
@@ -578,10 +590,10 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     // })
     .attr('x', d => this.xScale_7(d.val_x))
     .attr('width', this.barWidth_7 - this.barPadding_7)
-    .attr('height', d => this.height*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
+    .attr('height', d => this.height_7*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
     .style('fill', d => d3.interpolateOranges(d.val_y/d3.max(this.dataset_n7, d => d.val_y + 20)))
     .transition()
-    .attr('y', d => this.height - this.height*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
+    .attr('y', d => this.height_7 - this.height_7*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
 
     // hover over mouse
     this.chart_7
