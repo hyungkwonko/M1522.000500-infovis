@@ -131,20 +131,23 @@ var MIDIPlayerPercentage = function() {
     // time1.innerHTML = timeFormatting(currentTime);
     // time2.innerHTML = "-" + timeFormatting(duration - currentTime);
 
+
     // console.log (progress)
     
     var status_bar1 = document.getElementById("bars6_0");
-    status_bar1.style.color = "#EB7A7A"
-    status_bar1.style.fill = "#EB7A7A"
+    status_bar1.style.color = "#003b96"
+    status_bar1.style.fill = "#003b96"
     status_bar1.style.width = 3 + 'px';
-    status_bar1.style.position = 'relative'
-    status_bar1.style.marginLeft = 973.11 * progress + 'px';
+    status_bar1.setAttribute('x', 973.11 * progress + 'px');
+    // status_bar1.x = 973.11 * progress + 'px';
     status_bar1.style.height = 200;
 
     var status_bar2 = document.getElementById("bars7_0");
-    status_bar2.style.color = "#EB7A7A"
-    status_bar2.style.fill = "#EB7A7A"
-    status_bar2.style.width = 973.11 * progress + 'px';
+    status_bar2.style.color = "#003b96"
+    status_bar2.style.fill = "#003b96"
+    status_bar2.style.width = 3 + 'px';
+    // status_bar2.style.width = 973.11 * progress + 'px';
+    status_bar2.setAttribute('x', 973.11 * progress + 'px');
     status_bar2.style.height = 100;
   });
 };
