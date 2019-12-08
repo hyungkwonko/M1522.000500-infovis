@@ -177,7 +177,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
         }
       );
     };
-
+    
     for (let i = 0; i < this.mold.Notes.length; i++) {
       if (this.mold.Notes[i].Note_velocity > 0) {
         this.dataset_n6.push(
