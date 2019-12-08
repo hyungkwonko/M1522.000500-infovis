@@ -213,7 +213,7 @@ export class Seijun2Component implements OnInit, AfterViewInit {
         this.updateChart();
       }
       this.sortChart(Event);
-      this.key = '(Key may be ' + this.findKeyFromDistribution() + '.)';
+      this.key = '(Key may be ' + this.findKeyFromDistribution() + ')';
     }
   }
 
