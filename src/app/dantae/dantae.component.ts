@@ -4,6 +4,7 @@ import Vex from 'vexflow/src/index.js';
 import * as d3 from 'd3';
 import { LoadingBarModule, LoadingBarService } from '@ngx-loading-bar/core'
 import { MatSliderChange } from '@angular/material/slider';
+import { element } from 'protractor';
 
 @Component({
   selector: 'app-dantae',
@@ -23,6 +24,7 @@ export class DantaeComponent implements OnInit, AfterViewInit {
   public hasRendered = false;
   public spinner: any;
   public div: any;
+  public ID2IDs = {};
 
   ngOnInit() {
     this.hasRendered = false;
@@ -73,7 +75,6 @@ export class DantaeComponent implements OnInit, AfterViewInit {
     renderer.resize(renderWidth, 420);
     let ctx = renderer.getContext();
     ctx.setFont("Arial", 10, "").setBackgroundFillStyle("#eed");
-    //ctx.scale(0.6, 0.6);
     obj.group = ctx.openGroup();
   
     let registry = new VF.Registry();
@@ -86,7 +87,7 @@ export class DantaeComponent implements OnInit, AfterViewInit {
     let y = 0;
     let width = 600;
     let height = 0;
-    let voices = []
+    let voices = [];
     let formatter = new VF.Formatter();
     console.log(obj.data)
     let measureCount = obj.data.Score.Staves[0].length;
@@ -122,6 +123,11 @@ export class DantaeComponent implements OnInit, AfterViewInit {
           else if (notation.Type === 'note') {
             let note = new VF.StaveNote(notation.Options);
             note.setAttribute('id', notation.Element_id);
+            for (let i = 0; i < notation.IDs.length; i++) {
+              if (!(notation.IDs[i].toString() in obj.ID2IDs)) {
+                obj.ID2IDs[notation.IDs[i].toString()] = notation.IDs;
+              }
+            }
             let str : string;
             if (typeof notation.Options !== "string") {
               str = notation.Options.duration;
@@ -176,7 +182,7 @@ export class DantaeComponent implements OnInit, AfterViewInit {
     // Now x and y is the total size of score graphic.
     console.log("while rendering score...");
     ctx.setViewBox(0, -70, renderWidth, y + 70);
-    ctx.svg.setAttribute('preserveAspectRatio', 'xMinYMin meet')
+    ctx.svg.setAttribute('preserveAspectRatio', 'xMinYMin meet');
   
     for (let i = 0; i < voices[0].length; i++) {
       let f = [];
@@ -210,12 +216,66 @@ export class DantaeComponent implements OnInit, AfterViewInit {
     ties.forEach(function(t) {t.setContext(ctx).draw()});
   
     ctx.closeGroup();
-  
     obj.group.id = "score_group"
   
     VF.Registry.disableDefaultRegistry();
 
+    obj.data.Notes.forEach(element => {
+      obj.initializeNoteheadsByNoteID(element.ID);
+    });
+
     obj.afterRendering(obj);
+  }
+
+  initializeNoteheadsByNoteID(noteID: number, obj: DantaeComponent) {
+    if (typeof obj === "undefined") obj = this;
+    let index = obj.ID2IDs[noteID.toString()].indexOf(noteID);
+    let representativeNote = obj.ID2IDs[noteID.toString()][0];
+    let noteData = obj.data.Notes.find(note => note.ID === noteID);
+    let stavenoteList = document.querySelectorAll('[id^="vf-' + representativeNote.toString() + '-"]');
+    stavenoteList.forEach(element => {
+      let noteheadG = obj.findAllChildrenByClass(element, 'vf-notehead');
+      let notehead;
+      if (noteheadG.length > index) {
+        notehead = noteheadG[index].firstChild;
+      }
+      else {
+        console.log(noteID.toString() + " does not exist!");
+        return;
+      }
+
+      /*
+      let enter = d3.select(notehead)
+                    .data([noteData], function(d) { return noteID.toString() })
+                    .enter();
+      */
+      let update = d3.select(notehead)
+                     .data([noteData], function(d) { return noteID.toString() })
+                     .attr('fill', d => /*color(d.state)*/'blue')  // 색 함수(state => colorString)에 넣어서 처리
+                     .on('mouseenter', d => {d3.select(notehead).attr('fill', 'red')})//d => d.State.hovered = true)
+                     .on('mouseout', d => {d3.select(notehead).attr('fill', 'blue')})//d => d.State.hovered = false)
+                     //.on('onclick', d => d.State.selected = true)
+      /*
+      let exit = d3.select(notehead)
+                   .data([noteData], function(d) { return noteID.toString() })
+                   .exit();
+      */
+    });
+  }
+
+  findAllChildrenByClass(element: any, className: string) {
+    let foundElements = [];
+    function recurse(element: any, className: string) {
+      for (let i = 0; i < element.childNodes.length; i++) {
+          let el = element.childNodes[i];
+          if (el.getAttribute('class') == className) {
+            foundElements.push(element.childNodes[i]);
+          }
+          recurse(element.childNodes[i], className);
+      }
+    }
+    recurse(element, className);
+    return foundElements;
   }
 
   onSliderChange(event: MatSliderChange) {
