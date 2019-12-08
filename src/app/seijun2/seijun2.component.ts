@@ -24,7 +24,7 @@ export class Seijun2Component implements OnInit, AfterViewInit {
   public pitch: Array<any> = [];
   public pitchCount: any;
   public octave: Array<any> = [];
-  public title = 'Stacked Bar Chart';
+  public title = 'Note pitch class distribution';
   public keys: Array<any> = [];
   public len: number;
   public files: Array<any> = [];
