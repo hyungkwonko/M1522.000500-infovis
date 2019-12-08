@@ -32,6 +32,10 @@ export class AppComponent {
   }
 
   public updateData($event) {
+
+    var timeCursor = document.getElementById("cursor");
+    timeCursor.style.width = '0px';
+
     this.appData = $event;
     this._filelistService.getMusic($event)
       .subscribe((data: any) => {
