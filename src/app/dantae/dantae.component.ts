@@ -251,14 +251,15 @@ export class DantaeComponent implements OnInit, AfterViewInit {
       let enter = d3.select(notehead)
                     .data([noteData], function(d) { return noteID.toString() })
                     .enter()
-                    .on('mouseenter', d => {d3.select(notehead).attr('fill', 'red')})//d => d.State.hovered = true)
-                    .on('mouseout', d => {d3.select(notehead).attr('fill', 'blue')})//d => d.State.hovered = false)
+                    //.on('mouseenter', d => {d3.select(notehead).attr('fill', 'red')})//d => d.State.hovered = true)
+                    //.on('mouseout', d => {d3.select(notehead).attr('fill', 'blue')})//d => d.State.hovered = false)
 
       let update = d3.select(notehead)
                      .data([noteData], function(d) { return noteID.toString() })
-                     .attr('fill', d => /*color(d.state)*/'blue')  // 색 함수(state => colorString)에 넣어서 처리
-                     .on('mouseenter', d => {d3.select(notehead).attr('fill', 'red')})//d => d.State.hovered = true)
-                     .on('mouseout', d => {d3.select(notehead).attr('fill', 'blue')})//d => d.State.hovered = false)
+                     .attr('class', 'nh-' + noteID)
+                     //.attr('fill', d => /*color(d.state)*/'blue')  // 색 함수(state => colorString)에 넣어서 처리
+                     //.on('mouseenter', d => {d3.select(notehead).attr('fill', 'red')})//d => d.State.hovered = true)
+                     //.on('mouseout', d => {d3.select(notehead).attr('fill', 'blue')})//d => d.State.hovered = false)
                      //.on('onclick', d => d.State.selected = true)
       /*
       let exit = d3.select(notehead)
