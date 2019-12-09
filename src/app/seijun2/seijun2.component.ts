@@ -270,8 +270,8 @@ export class Seijun2Component implements OnInit, AfterViewInit {
     this.xScale.domain(this.pitch.map(d => d));
     this.yScale.domain([0, d3.max(this.data, d => d3.max(d, d => d[1]))]);
     this.colors.domain(this.data.map(d => d.key));
-    this.xAxis.transition().call(d3.axisBottom(this.xScale));
-    this.yAxis.transition().call(d3.axisLeft(this.yScale));
+    this.xAxis.call(d3.axisBottom(this.xScale));
+    this.yAxis.call(d3.axisLeft(this.yScale));
 
     console.log("this.colors");
     console.log(this.colors);
@@ -295,9 +295,9 @@ export class Seijun2Component implements OnInit, AfterViewInit {
       .attr('height', d => this.yScale(d[0]) - this.yScale(d[1]))
       .transition()
       .delay((d, i) => i * 30)
-        .attr('y', d => this.yScale(d[1]))
-        .attr('x', (d, i) => this.xScale(d.data.Class))
-        .ease(d3.easeLinear);
+      .attr('y', d => this.yScale(d[1]))
+      .attr('x', (d, i) => this.xScale(d.data.Class))
+      .ease(d3.easeLinear);
     
     // hover over mouse
     update.join('g')

@@ -38,14 +38,14 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
   * 얇은 세로 bar 모양으로 6번, 7번 시각화에 어두운 파란색으로 표시한다.
 
 * 색, 모양 변경
-  * Stacked 바 차트
+  * Stacked 바 차트(5번)
     * 각 bar의 Saturation이 45%로 고정
     * 각 bar의 Value가 옥타브에 따라 -1: 17.5% / 0: 25% / 1: 32.5% / 2: 40% / 3: 47.5% / 4: 55% / 5: 62.5% / 6: 70% / 7: 77.5% / 8: 85% / 9: 92.5% 로 되도록
     * 각 bar의 Hue가 음 종류에 따라 E = 0, A = 30, D = 60, G = 90, C = 120, F = 150, A# = 180, D# = 210, G# = 240, C# = 270, F# = 300, B = 330 이 되도록
     * 호버 시 테두리를 어두운 빨간색으로 표시
     * 선택 시 테두리를 어두운 보라색으로 표시
 
-  * velocity 히스토그램, 바 차트(7번)
+  * velocity 히스토그램(3번), 바 차트(7번)
     * 전부 Saturation이 0%로 grayscale
     * velocity가 20 이하: 색 Value가 20%, 범례가 ppp
     * velocity가 21 이상 37 이하: 색 Value가 30%, 범례가 pp
@@ -59,7 +59,7 @@ This project was generated with [Angular CLI](https://github.com/angular/angular
     * 선택 시 보라색으로 표시
     * 바 차트(7번)에서 재생 중인 음표에 해당하는 바는 파란색으로 표시
 
-  * position 히스토그램
+  * position 히스토그램(4번)
     * 호버 시 크기(두께)가 3px로 커지고 색은 건드리지 않기
     * 선택 시 크기(두께)가 2px로 커지고 색은 건드리지 않기
 
