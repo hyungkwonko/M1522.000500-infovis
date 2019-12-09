@@ -144,7 +144,7 @@ var MIDIPlayerPercentage = function() {
     status_bar1.style.color = "#003b96"
     status_bar1.style.fill = "#003b96"
     status_bar1.style.width = 3 + 'px';
-    status_bar1.setAttribute('x', 973.11 * progress + 'px');
+    status_bar1.setAttribute('x', 903.18 * progress + 'px');
     // status_bar1.x = 973.11 * progress + 'px';
     status_bar1.style.height = 200;
 
@@ -153,7 +153,7 @@ var MIDIPlayerPercentage = function() {
     status_bar2.style.fill = "#003b96"
     status_bar2.style.width = 3 + 'px';
     // status_bar2.style.width = 973.11 * progress + 'px';
-    status_bar2.setAttribute('x', 973.11 * progress + 'px');
+    status_bar2.setAttribute('x', 903.18 * progress + 'px');
     status_bar2.style.height = 100;
 
     var divcurtime = document.getElementById ("currenttime");
