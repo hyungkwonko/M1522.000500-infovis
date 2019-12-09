@@ -25,8 +25,11 @@
 }
 
 .sj-chart1 > h4,
+.sj-chart1 > h5 {
+  margin: 20px 10px 0px 10px;
+}
+
 .sj-chart2 > h4,
-.sj-chart1 > h5,
 .sj-chart2 > h5 {
   margin: 20px 10px -20px 10px;
 }
