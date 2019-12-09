@@ -310,23 +310,27 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       .style('stroke', "#1ad669")
       .style('stroke-width', '3');
     d3.selectAll('.nh-' + d.ID)
-      .style('fill', '#1ad669')
+      .style('fill', 'red')
     let rects = document.getElementsByClassName('nh-' + d.ID);
     if (rects.length > 0) {
-      d3.select('#score_group')
-        .style('transform', 'translate(' + 
-          (600 - rects[0].getBoundingClientRect().left).toString() + 'px, 0px)');
-      let percent = (Number(document.getElementById('score-slider').getAttribute("aria-valuenow")) / 
-        Number(document.getElementById('score-slider').getAttribute("aria-valuemax"))) * 100 - 100;
-      d3.select('#score-slider')
-        .attr('aria-valuenow', (rects[0].getBoundingClientRect().left - 600).toString())
-        .select('.mat-slider-thumb-container')
-        .style('transform', 'translate(' + percent + "%)") // TODO
-      d3.select('.mat-slider-track-background')
-        .attr('style', 'transform: translateX(0px) scale3d(' + (percent / -100) +  ', 1, 1);');
-      d3.select('.mat-slider-track-fill')
-        .attr('style', 'transform: translateX(0px) scale3d(' + (1 - (percent / -100)) +  ', 1, 1);')
-      
+      let newPos = rects[0].getBoundingClientRect().left;
+      while (rects[0].getBoundingClientRect().left <= 700 || rects[0].getBoundingClientRect().left > 900) {
+        console.log(rects[0].getBoundingClientRect().left);
+        if (rects[0].getBoundingClientRect().left <= 700) newPos -= 150;
+        else if (rects[0].getBoundingClientRect().left > 900) newPos += 150;
+        d3.select('#score_group')
+          .style('transform', 'translate(' + (-1 * newPos).toString() + 'px, 0px)');
+        let percent = (Number(document.getElementById('score-slider').getAttribute("aria-valuenow")) / 
+          Number(document.getElementById('score-slider').getAttribute("aria-valuemax"))) * 100 - 100;
+        d3.select('#score-slider')
+          .attr('aria-valuenow', (newPos).toString())
+          .select('.mat-slider-thumb-container')
+          .style('transform', 'translate(' + percent + "%)") // TODO
+        d3.select('.mat-slider-track-background')
+          .attr('style', 'transform: translateX(0px) scale3d(' + (percent / -100) +  ', 1, 1);');
+        d3.select('.mat-slider-track-fill')
+          .attr('style', 'transform: translateX(0px) scale3d(' + (1 - (percent / -100)) +  ', 1, 1);')
+      }
     }
   }
 
