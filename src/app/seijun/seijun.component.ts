@@ -72,6 +72,8 @@ export class SeijunComponent implements OnInit, AfterViewInit {
   private chart_4: any;
   private chart_6: any;
   private chart_7: any;
+  private margin_xaxis_for_legend: number = 80;
+  private margin_yaxis_for_legend: number = 100;
 
   private start_drawing: boolean = true;
 
@@ -82,7 +84,6 @@ export class SeijunComponent implements OnInit, AfterViewInit {
 
   private update_6: any;
   private update_7: any;
-
 
 
   // Helper Variables
@@ -429,28 +430,28 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     .call(d3.axisRight(this.yScale_3))
     .selectAll("text").remove()
 
-    let legend = svg_3.append("g")
-    .attr("text-anchor", "end")
-    .selectAll("g")
-    .data(this.dynamic_marks)
-    .enter()
-    .append("g")
-    .attr("transform", function(d, i) { return "translate(0," + i * 5 + ")"; }); 
+    // let legend = svg_3.append("g")
+    // .attr("text-anchor", "end")
+    // .selectAll("g")
+    // .data(this.dynamic_marks)
+    // .enter()
+    // .append("g")
+    // .attr("transform", function(d, i) { return "translate(0," + i * 5 + ")"; }); 
     
-    legend.append("rect")
-    .attr("x", this.width + 25)
-    .attr("y", this.height - 30)
-    .attr("width", 5)
-    .attr("height", 5)
-    .attr("fill", (d, i) => this.bar_color_3[i]);
+    // legend.append("rect")
+    // .attr("x", this.width + 25)
+    // .attr("y", this.height - 30)
+    // .attr("width", 5)
+    // .attr("height", 5)
+    // .attr("fill", (d, i) => this.bar_color_3[i]);
     
-    legend.append("text")
-    .attr("x", this.width + 20)
-    .attr("y", this.height - 25)
-    // .attr("dy", "0.1em")
-    .attr("dy", 1)
-    .attr("font-size", "7px")
-    .text(function(d) { return d; });
+    // legend.append("text")
+    // .attr("x", this.width + 20)
+    // .attr("y", this.height - 25)
+    // // .attr("dy", "0.1em")
+    // .attr("dy", 1)
+    // .attr("font-size", "7px")
+    // .text(function(d) { return d; });
     }
 
   createChart4() {
@@ -508,39 +509,39 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     .call(d3.axisRight(this.yScale_4))
     .selectAll("text").remove()
 
-    let legend = svg_4.append("g")
-    .attr("text-anchor", "end")
-    .selectAll("g")
-    .data(this.pitch_domain)
-    .enter()
-    .append("g")
-    .attr("transform", function(d, i) { return "translate(0," + i * 5 + ")"; }); 
+    // let legend = svg_4.append("g")
+    // .attr("text-anchor", "end")
+    // .selectAll("g")
+    // .data(this.pitch_domain)
+    // .enter()
+    // .append("g")
+    // .attr("transform", function(d, i) { return "translate(0," + i * 5 + ")"; }); 
     
-    legend.append("rect")
-    .attr("x", this.width + 25)
-    .attr("y", this.height - 30)
-    .attr("width", 5)
-    .attr("height", 5)
-    .attr("fill", (d, i) => this.color[i]);
+    // legend.append("rect")
+    // .attr("x", this.width + 25)
+    // .attr("y", this.height - 30)
+    // .attr("width", 5)
+    // .attr("height", 5)
+    // .attr("fill", (d, i) => this.color[i]);
     
-    legend.append("text")
-    .attr("x", this.width + 20)
-    .attr("y", this.height - 25)
-    // .attr("dy", "0.1em")
-    .attr("dy", 1)
-    .attr("font-size", "7px")
-    .text(function(d) { return d; });
+    // legend.append("text")
+    // .attr("x", this.width + 20)
+    // .attr("y", this.height - 25)
+    // // .attr("dy", "0.1em")
+    // .attr("dy", 1)
+    // .attr("font-size", "7px")
+    // .text(function(d) { return d; });
   }
 
   createChart6() {
     let element: any = this.svgRef4.nativeElement;
-    this.width_6 = element.offsetWidth - this.margin.left - this.margin.right;
+    this.width_6 = element.offsetWidth - this.margin.left - this.margin.right - this.margin_xaxis_for_legend;
     this.height_6 = element.offsetHeight - this.margin.top - this.margin.bottom;
 
 
     let svg_6 = d3.select(element)
     .append('svg')
-    .attr('width', element.offsetWidth)
+    .attr('width', element.offsetWidth + this.margin_xaxis_for_legend)
     .attr('height', element.offsetHeight);
 
     this.chart_6 = svg_6
@@ -569,18 +570,41 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`)
     .call(d3.axisLeft(this.yScale_6));
 
+    let legend = svg_6.append("g")
+    .attr("text-anchor", "end")
+    .selectAll("g")
+    .data(this.pitch_domain)
+    .enter()
+    .append("g")
+    .attr("transform", function(d, i) { return "translate(0," + i * 13 + ")"; }); 
+    
+    legend.append("rect")
+    .attr("x", this.width_6 + this.margin_xaxis_for_legend + 21)
+    .attr("y", this.height_6 - this.margin_yaxis_for_legend - 20)
+    .attr("width", 13)
+    .attr("height", 13)
+    .attr("fill", (d, i) => this.color[i]);
+    
+    legend.append("text")
+    .attr("x", this.width_6 + this.margin_xaxis_for_legend + 16)
+    .attr("y", this.height_6 - this.margin_yaxis_for_legend -12 )
+    // .attr("dy", "0.1em")
+    .attr("dy", 1.5)
+    .attr("font-size", "13px")
+    .text(function(d) { return d; });
+
   }
 
   createChart7() {
     let element: any = this.svgRef5.nativeElement;
     //this.barWidth_7 = this.width / this.dataset_n7.length;
 
-    this.width_7 = element.offsetWidth - this.margin.left - this.margin.right;
+    this.width_7 = element.offsetWidth - this.margin.left - this.margin.right - this.margin_xaxis_for_legend;
     this.height_7 = element.offsetHeight - this.margin.top - this.margin.bottom;
 
     let svg_7 = d3.select(element)
     .append('svg')
-    .attr('width', element.offsetWidth)
+    .attr('width', element.offsetWidth + this.margin_xaxis_for_legend)
     .attr('height', element.offsetHeight);
 
     this.chart_7 = svg_7
@@ -608,6 +632,29 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     .attr('class', 'yAxis7')
     .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`)
     .call(d3.axisLeft(this.yScale_7));
+
+    let legend = svg_7.append("g")
+    .attr("text-anchor", "end")
+    .selectAll("g")
+    .data(this.dynamic_marks)
+    .enter()
+    .append("g")
+    .attr("transform", function(d, i) { return "translate(0," + i * 13 + ")"; }); 
+    
+    legend.append("rect")
+    .attr("x", this.width_7 + this.margin_xaxis_for_legend + 20)
+    .attr("y", this.height_7 - this.margin_yaxis_for_legend + 20)
+    .attr("width", 13)
+    .attr("height", 13)
+    .attr("fill", (d, i) => this.bar_color_3[i]);
+    
+    legend.append("text")
+    .attr("x", this.width_7 + this.margin_xaxis_for_legend + 15)
+    .attr("y", this.height_7 - this.margin_yaxis_for_legend + 28.5)
+    // .attr("dy", "0.1em")
+    .attr("dy", 1.5)
+    .attr("font-size", "13px")
+    .text(function(d) { return d; });
 
   }
     
