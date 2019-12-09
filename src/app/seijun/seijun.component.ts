@@ -1,8 +1,9 @@
 import { IMusic } from './../music';
-import { Component, OnInit, ViewChild, Input, ElementRef, AfterViewInit, SimpleChanges} from '@angular/core';
+import { Component, OnInit, ViewChild, Input, ElementRef, AfterViewInit, SimpleChanges, Output} from '@angular/core';
 import * as d3 from 'd3';
 
 import * as _ from 'lodash';
+import { EventEmitter } from 'events';
 
 @Component({
   selector: 'app-seijun',
@@ -298,7 +299,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     //d.State.hovered = true;
     function c(da): any {
       return d3.rgb(da.pitch_class_color).darker(2);
-    } 
+    }
     d3.selectAll('.bar6')
       .filter(da => da["ID"] === d.ID)
       .style('stroke', c(this.dataset_n6.find((e) => e.ID === d.ID)))
@@ -307,6 +308,25 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       .filter(da => da["ID"] === d.ID)
       .style('stroke', "#1ad669")
       .style('stroke-width', '3');
+    d3.selectAll('.nh-' + d.ID)
+      .style('fill', '#1ad669')
+    let rects = document.getElementsByClassName('nh-' + d.ID);
+    if (rects.length > 0) {
+      d3.select('#score_group')
+        .style('transform', 'translate(' + 
+          (600 - rects[0].getBoundingClientRect().left).toString() + 'px, 0px)');
+      let percent = (Number(document.getElementById('score-slider').getAttribute("aria-valuenow")) / 
+        Number(document.getElementById('score-slider').getAttribute("aria-valuemax"))) * 100 - 100;
+      d3.select('#score-slider')
+        .attr('aria-valuenow', (rects[0].getBoundingClientRect().left - 600).toString())
+        .select('.mat-slider-thumb-container')
+        .style('transform', 'translate(' + percent + "%)") // TODO
+      d3.select('.mat-slider-track-background')
+        .attr('style', 'transform: translateX(0px) scale3d(' + (percent / -100) +  ', 1, 1);');
+      d3.select('.mat-slider-track-fill')
+        .attr('style', 'transform: translateX(0px) scale3d(' + (1 - (percent / -100)) +  ', 1, 1);')
+      
+    }
   }
 
   set_hovered_group3(d, i, nodes) {
@@ -336,9 +356,11 @@ export class SeijunComponent implements OnInit, AfterViewInit {
     d3.selectAll('.bar6')
       .filter(da => da["ID"] === d.ID)
       .style('stroke-width', '0');
-      d3.selectAll('.bar7')
+    d3.selectAll('.bar7')
       .filter(da => da["ID"] === d.ID)
       .style('stroke-width', '0');
+    d3.selectAll('.nh-' + d.ID)
+      .style('fill', 'black')
   }
 
   free_hovered_group3(d, i, nodes) {
