@@ -84,6 +84,7 @@ export class SeijunComponent implements OnInit, AfterViewInit {
 
   private update_6: any;
   private update_7: any;
+  private note_initialized: boolean = false;
 
 
   // Helper Variables
@@ -293,6 +294,8 @@ export class SeijunComponent implements OnInit, AfterViewInit {
         this.updateChart6();
         this.updateChart7();
       }
+
+      this.updateNotes();
     }
   }
 
@@ -311,11 +314,12 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       .style('stroke-width', '3');
     d3.selectAll('.nh-' + d.ID)
       .style('fill', 'red')
+    this.updateNotes();
     let rects = document.getElementsByClassName('nh-' + d.ID);
     if (rects.length > 0) {
       let newPos = rects[0].getBoundingClientRect().left;
       while (rects[0].getBoundingClientRect().left <= 700 || rects[0].getBoundingClientRect().left > 900) {
-        console.log(rects[0].getBoundingClientRect().left);
+        //console.log(rects[0].getBoundingClientRect().left);
         if (rects[0].getBoundingClientRect().left <= 700) newPos -= 150;
         else if (rects[0].getBoundingClientRect().left > 900) newPos += 150;
         d3.select('#score_group')
@@ -332,6 +336,23 @@ export class SeijunComponent implements OnInit, AfterViewInit {
           .attr('style', 'transform: translateX(0px) scale3d(' + (1 - (percent / -100)) +  ', 1, 1);')
       }
     }
+  }
+
+  set_hovered_notes(d, i, nodes) {
+    //d.State.hovered = true;
+    function c(da): any {
+      return d3.rgb(da.pitch_class_color).darker(2);
+    }
+    d3.selectAll('.bar6')
+      .filter(da => da["ID"] === d.ID)
+      .style('stroke', c(this.dataset_n6.find((e) => e.ID === d.ID)))
+      .style('stroke-width', '3');
+    d3.selectAll('.bar7')
+      .filter(da => da["ID"] === d.ID)
+      .style('stroke', "#1ad669")
+      .style('stroke-width', '3');
+    d3.selectAll('.nh-' + d.ID)
+      .style('fill', 'red')
   }
 
   set_hovered_group3(d, i, nodes) {
@@ -829,5 +850,17 @@ export class SeijunComponent implements OnInit, AfterViewInit {
       .attr('width', d => this.xScale_7(d.Timing_Difference) > 0 ? this.xScale_7(d.Timing_Difference) : 1)
       .attr('height', d => this.height_7*(d.val_y)/d3.max(this.dataset_n7, d => d.val_y))
 
+  }
+
+  updateNotes() {
+    if (this.note_initialized) return;
+    for (let i = 0; i < this.mold.Notes.length; i++) {
+      let id = this.mold.Notes[i].ID;
+      d3.selectAll('.nh-' + id)
+        .on('mouseover', (d, i, nodes) => {
+          this.note_initialized = true;
+          this.set_hovered_notes(d, i, nodes)})
+        .on('mouseout', (d, i, nodes) => this.free_hovered(d, i, nodes));
+    }
   }
 }
