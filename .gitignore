@@ -44,3 +44,7 @@ testem.log
 # System Files
 .DS_Store
 Thumbs.db
+
+# remove MIDI data & preprocessed data
+/Preprocessing/preprocessed
+/midi_data
