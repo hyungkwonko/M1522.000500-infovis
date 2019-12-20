@@ -47,4 +47,3 @@ Thumbs.db
 
 # remove MIDI data & preprocessed data
 /Preprocessing/preprocessed
-/midi_data
