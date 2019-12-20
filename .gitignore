@@ -45,5 +45,5 @@ testem.log
 .DS_Store
 Thumbs.db
 
-# remove MIDI data & preprocessed data
+# remove preprocessed data
 /Preprocessing/preprocessed
